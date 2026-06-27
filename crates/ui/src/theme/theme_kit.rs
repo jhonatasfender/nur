@@ -45,6 +45,21 @@ impl ThemeKit {
         visuals.panel_fill = palette.background();
         visuals.window_fill = palette.surface();
         visuals.override_text_color = Some(palette.text());
+        // Controles (combos/campos) com a cor de "control" (1 nível acima do
+        // card), borda sutil e cantos arredondados — espelhando o protótipo.
+        let radius = egui::CornerRadius::same(8);
+        let stroke = egui::Stroke::new(1.0, palette.border());
+        for widget in [
+            &mut visuals.widgets.inactive,
+            &mut visuals.widgets.hovered,
+            &mut visuals.widgets.active,
+            &mut visuals.widgets.open,
+        ] {
+            widget.bg_fill = palette.control();
+            widget.weak_bg_fill = palette.control();
+            widget.bg_stroke = stroke;
+            widget.corner_radius = radius;
+        }
         ctx.set_visuals(visuals);
     }
 }

@@ -34,6 +34,7 @@ panic = "deny"
 # Allows conscientes (mesmos do projeto de referência).
 module_name_repetitions = "allow"
 must_use_candidate = "allow"
+struct_excessive_bools = "allow"
 return_self_not_must_use = "allow"
 struct_field_names = "allow"
 single_match_else = "allow"
