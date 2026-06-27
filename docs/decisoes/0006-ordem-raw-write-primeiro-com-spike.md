@@ -1,6 +1,6 @@
 # ADR 0006 — Raw write primeiro + spike Windows cedo
 
-**Status:** Aceita · **Data:** 2026-06-26 · **A confirmar com o usuário** (proposta na conversa; aguardando OK final antes do plano)
+**Status:** Aceita · **Data:** 2026-06-26 · **Confirmado pelo usuário** (começar pelo Linux, que constrói toda a arquitetura do projeto).
 
 ## Contexto
 Definida a Opção A (ADR 0005), surge a pergunta: implementar primeiro o caminho **fácil** (raw write/Linux) ou o **difícil** (extração Windows)? O usuário levantou começar pelo difícil ("encarar o medo primeiro").
@@ -22,4 +22,4 @@ Definida a Opção A (ADR 0005), surge a pergunta: implementar primeiro o caminh
 ## Consequências
 - Primeira entrega utilizável (Linux) sai cedo.
 - Risco do Windows conhecido antes do investimento grande.
-- **Pendência:** confirmar com o usuário se aceita esta ordem ou se prefere o caminho Windows completo como primeira entrega.
+- **Confirmado:** o usuário aprovou começar pelo Linux (Fase 1), que levanta toda a arquitetura do projeto.
