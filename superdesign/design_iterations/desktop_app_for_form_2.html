@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Formatador de Pendrive — Variação 2 (Espaçoso)</title>
+<script>
+  (function () {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+  })();
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+<style>
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .field-label { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: #6b7280; }
+  .dark .field-label { color: #9ca3af; }
+  select, input[type="text"] { transition: border-color .15s ease, box-shadow .15s ease; }
+  select:focus, input[type="text"]:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
+  .dark select:focus, .dark input[type="text"]:focus { border-color: #e5e7eb; box-shadow: 0 0 0 3px rgba(255,255,255,.1); }
+  .mode-card { transition: all .15s ease; }
+  .mode-card.active { border-color:#111827; background:#111827; color:#fff; }
+  .mode-card.active .mc-sub { color:#d1d5db; }
+  .mode-card.active .mc-ic { background:rgba(255,255,255,.15); }
+  .dark .mode-card.active { border-color:#f3f4f6; background:#f3f4f6; color:#111827; }
+  .dark .mode-card.active .mc-sub { color:#4b5563; }
+  .dark .mode-card.active .mc-ic { background:rgba(0,0,0,.1); }
+  .drop-zone { transition: border-color .15s ease, background .15s ease; }
+  .drop-zone.dragover { border-color:#111827; background:#f9fafb; }
+  .dark .drop-zone.dragover { border-color:#e5e7eb; background:#1f2937; }
+  @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(220,38,38,.35)} 70%{box-shadow:0 0 0 8px rgba(220,38,38,0)} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0)} }
+  .danger-pulse { animation: pulse-ring 1.8s infinite; }
+</style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-950 min-h-screen flex items-center justify-center p-4 transition-colors">
+
+<div class="w-full max-w-3xl bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
+
+  <!-- Header -->
+  <div class="px-8 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white dark:text-gray-900"><rect x="9" y="2" width="6" height="11" rx="1"/><path d="M12 13v7"/><rect x="7" y="20" width="10" height="2" rx="1"/></svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">Formatador de Pendrive</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Formate ou crie um pendrive bootável em poucos cliques</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950 px-3 py-1 rounded-full flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> 1 dispositivo detectado
+      </span>
+      <button id="themeToggle" title="Alternar tema" class="w-9 h-9 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+        <svg class="dark:hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="hidden dark:block" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modo -->
+  <div class="px-8 pt-6">
+    <label class="field-label block mb-2">O que deseja fazer?</label>
+    <div class="grid grid-cols-2 gap-3">
+      <button class="mode-card active text-left border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center gap-3 text-gray-900 dark:text-gray-100" data-mode="boot">
+        <span class="mc-ic w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+        <span><span class="block text-sm font-semibold">Criar pendrive bootável</span><span class="mc-sub block text-xs text-gray-500 dark:text-gray-400">Grava uma imagem ISO</span></span>
+      </button>
+      <button class="mode-card text-left border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center gap-3 text-gray-900 dark:text-gray-100" data-mode="format">
+        <span class="mc-ic w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+        <span><span class="block text-sm font-semibold">Apenas formatar</span><span class="mc-sub block text-xs text-gray-500 dark:text-gray-400">Limpa o dispositivo</span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Corpo em 2 colunas -->
+  <div class="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Coluna esquerda: dispositivo + ISO -->
+    <div class="space-y-5">
+      <div>
+        <label class="field-label block mb-1.5">Dispositivo</label>
+        <div class="relative">
+          <select id="device" class="w-full appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg pl-3 pr-10 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+            <option value="">— Selecione o pendrive —</option>
+            <option value="sdb">SanDisk Ultra — 32 GB (/dev/sdb)</option>
+            <option value="sdc">Kingston DataTraveler — 16 GB (/dev/sdc)</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div id="deviceCard" class="hidden mt-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 rounded-lg px-3 py-2 flex items-start gap-2">
+          <svg class="mt-0.5 shrink-0 text-red-600 dark:text-red-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          <p class="text-xs text-red-700 dark:text-red-300">Todos os dados de <span id="devName" class="font-semibold">/dev/sdb</span> serão apagados permanentemente.</p>
+        </div>
+      </div>
+
+      <div id="isoBlock">
+        <label class="field-label block mb-1.5">Imagem ISO</label>
+        <div id="dropZone" class="drop-zone border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl px-4 py-8 text-center cursor-pointer">
+          <svg class="mx-auto mb-2 text-gray-500 dark:text-gray-400" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p id="isoText" class="text-sm text-gray-600 dark:text-gray-300">Arraste a ISO aqui ou <span class="font-semibold text-gray-900 dark:text-gray-100 underline">selecione um arquivo</span></p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Formatos aceitos: .iso · .img</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna direita: opções -->
+    <div class="space-y-4">
+      <label class="field-label block">Opções de formato</label>
+      <div>
+        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Esquema de partição</label>
+        <div class="relative">
+          <select class="w-full appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100"><option>GPT (recomendado para UEFI)</option><option>MBR (compatível com BIOS antigo)</option></select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Sistema alvo</label>
+          <div class="relative">
+            <select class="w-full appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100"><option>UEFI</option><option>BIOS</option></select>
+            <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Sistema de arquivos</label>
+          <div class="relative">
+            <select class="w-full appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100"><option>FAT32</option><option>NTFS</option><option>exFAT</option><option>ext4</option></select>
+            <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Rótulo do volume</label>
+        <input type="text" value="BOOTUSB" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" />
+      </div>
+      <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+        <input type="checkbox" checked class="w-4 h-4 rounded border-gray-300 accent-gray-900 dark:accent-gray-100" /> Formatação rápida
+      </label>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="px-8 pb-5">
+    <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Status</span>
+        <span id="statusPct" class="text-sm font-semibold text-gray-500 dark:text-gray-400">Pronto</span>
+      </div>
+      <div class="w-full h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div id="bar" class="h-full bg-gray-900 dark:bg-gray-100 rounded-full" style="width:0%"></div>
+      </div>
+      <p id="statusText" class="text-xs text-gray-500 dark:text-gray-400 mt-2">Selecione um dispositivo e uma ISO para começar.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="px-8 py-4 bg-gray-50 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+    <button class="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Fechar</button>
+    <button id="startBtn" class="px-8 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold hover:bg-black dark:hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed" disabled>Iniciar</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-transparent dark:border-gray-800">
+    <div class="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950 flex items-center justify-center mb-4 danger-pulse">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+    </div>
+    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Apagar tudo deste pendrive?</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Esta ação é <strong>irreversível</strong>. Todos os arquivos de <span id="modalDevice" class="font-semibold text-gray-900 dark:text-gray-100">/dev/sdb</span> serão perdidos.</p>
+    <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Digite <span class="font-mono font-semibold text-gray-900 dark:text-gray-100">APAGAR</span> para confirmar</label>
+    <input id="confirmInput" type="text" placeholder="APAGAR" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm mb-4 font-mono text-gray-900 dark:text-gray-100" />
+    <div class="flex gap-3">
+      <button id="cancelBtn" class="flex-1 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+      <button id="confirmBtn" class="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed" disabled>Apagar e gravar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const device = document.getElementById('device');
+  const startBtn = document.getElementById('startBtn');
+  const deviceCard = document.getElementById('deviceCard');
+  const devName = document.getElementById('devName');
+  const isoBlock = document.getElementById('isoBlock');
+  const dropZone = document.getElementById('dropZone');
+  const isoText = document.getElementById('isoText');
+  const modal = document.getElementById('modal');
+  const confirmInput = document.getElementById('confirmInput');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const modalDevice = document.getElementById('modalDevice');
+  const bar = document.getElementById('bar');
+  const statusPct = document.getElementById('statusPct');
+  const statusText = document.getElementById('statusText');
+  const themeToggle = document.getElementById('themeToggle');
+  let mode = 'boot';
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+
+  function refresh() {
+    const ok = device.value !== '';
+    startBtn.disabled = !ok;
+    deviceCard.classList.toggle('hidden', !ok);
+    if (ok) { devName.textContent = '/dev/' + device.value; modalDevice.textContent = '/dev/' + device.value; }
+  }
+  device.addEventListener('change', refresh);
+
+  document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.mode-card').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    mode = b.dataset.mode;
+    isoBlock.style.display = mode === 'boot' ? 'block' : 'none';
+  }));
+
+  ['dragover','dragenter'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
+  const pickIso = () => { isoText.innerHTML = '<span class="font-semibold text-gray-900 dark:text-gray-100">ubuntu-24.04-desktop-amd64.iso</span> · 5,8 GB'; };
+  dropZone.addEventListener('drop', pickIso);
+  dropZone.addEventListener('click', pickIso);
+
+  startBtn.addEventListener('click', () => { modal.classList.remove('hidden'); confirmInput.value=''; confirmBtn.disabled=true; confirmInput.focus(); });
+  cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+  confirmInput.addEventListener('input', () => { confirmBtn.disabled = confirmInput.value.trim().toUpperCase() !== 'APAGAR'; });
+
+  confirmBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    let pct = 0;
+    statusText.textContent = mode === 'boot' ? 'Gravando imagem…' : 'Formatando…';
+    const iv = setInterval(() => {
+      pct = Math.min(100, pct + Math.random()*9);
+      bar.style.width = pct + '%';
+      statusPct.textContent = Math.floor(pct) + '%';
+      if (pct >= 100) { clearInterval(iv); statusPct.textContent='Concluído'; bar.classList.remove('bg-gray-900','dark:bg-gray-100'); bar.classList.add('bg-green-600'); statusText.textContent = mode === 'boot' ? 'Pendrive bootável pronto!' : 'Formatação concluída!'; }
+    }, 220);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Rust
+/target/
+**/target/
+Cargo.lock.bak
+*.rs.bk
+
+# Build / artefatos
+*.iso
+*.img
+*.swm
+
+# Editores / IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
