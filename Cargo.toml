@@ -3,6 +3,8 @@ resolver = "3"
 members = [
     "crates/domain",
     "crates/application",
+    "crates/infrastructure",
+    "crates/ui",
 ]
 
 [workspace.package]
