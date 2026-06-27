@@ -21,3 +21,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Scratch local (subagent-driven-development)
+.superpowers/

@@ -1,0 +1,79 @@
+name: Release
+
+# Gera os binários do Nur para Linux, Windows e macOS.
+# Dispara ao publicar uma tag `vX.Y.Z` ou manualmente (workflow_dispatch).
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write # necessário para anexar binários ao GitHub Release
+
+jobs:
+  build:
+    name: build (${{ matrix.alvo }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            alvo: x86_64-unknown-linux-gnu
+            artefato: nur-linux-x86_64
+            binario: nur
+          - os: windows-latest
+            alvo: x86_64-pc-windows-msvc
+            artefato: nur-windows-x86_64.exe
+            binario: nur.exe
+          - os: macos-latest
+            alvo: aarch64-apple-darwin
+            artefato: nur-macos-aarch64
+            binario: nur
+          - os: macos-latest
+            alvo: x86_64-apple-darwin
+            artefato: nur-macos-x86_64
+            binario: nur
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.alvo }}
+
+      - name: Dependências de sistema (Linux/egui)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libwayland-dev \
+            libxrandr-dev libxi-dev libxcursor-dev libgl1-mesa-dev pkg-config
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.alvo }}
+
+      - name: Build release
+        run: cargo build --release --bin nur --target ${{ matrix.alvo }}
+
+      - name: Preparar artefato
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.alvo }}/release/${{ matrix.binario }}" "dist/${{ matrix.artefato }}"
+
+      - name: Upload do artefato (build)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artefato }}
+          path: dist/${{ matrix.artefato }}
+          if-no-files-found: error
+
+      - name: Anexar ao GitHub Release (em tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ matrix.artefato }}
