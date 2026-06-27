@@ -1,0 +1,63 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/ui",
+    "crates/app",
+]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+authors = ["Jonatas <jhonatas.fender@gmail.com>"]
+
+[workspace.dependencies]
+thiserror = "2"
+anyhow = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+egui = "0.35"
+eframe = { version = "0.35", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+serde = { version = "1", features = ["derive"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[workspace.lints.clippy]
+# Piso obrigatório e camada pedante (nursery deliberadamente OFF), espelhando o solana.
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Sem-pânico em produção (liberado em testes via clippy.toml).
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+# Allows conscientes (mesmos do projeto de referência).
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+struct_field_names = "allow"
+single_match_else = "allow"
+too_many_lines = "allow"
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_precision_loss = "allow"
+cast_possible_wrap = "allow"
+cast_lossless = "allow"
+float_cmp = "allow"
+
+[workspace.lints.rust]
+# Lints do compilador como erro (encapsulamento e higiene estritos), espelhando o solana.
+missing_docs = "deny"
+unreachable_pub = "deny"
+unnameable_types = "deny"
+single_use_lifetimes = "deny"
+unused_lifetimes = "deny"
+trivial_numeric_casts = "deny"
+meta_variable_misuse = "deny"
+explicit_outlives_requirements = "deny"
+unused_qualifications = "deny"
+trivial_casts = "deny"
+redundant_imports = "deny"
+unsafe_code = "forbid"

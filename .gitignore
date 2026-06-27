@@ -21,3 +21,10 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Scratch local (subagent-driven-development)
+.superpowers/
+
+# Screenshots de validação (não versionar)
+nur-shot*.png
+nur-screenshot-*.png

@@ -1,0 +1,4 @@
+# Pânico é proibido em produção, mas liberado em testes (escopo #[cfg(test)]).
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
