@@ -21,7 +21,7 @@ impl NurApp {
             egui::StrokeKind::Inside,
         );
         // Conteúdo com padding interno (o card ocupa a janela inteira).
-        egui::Frame::NONE
+        let content = egui::Frame::NONE
             .inner_margin(egui::Margin::same(20))
             .show(ui, |ui| {
                 ui.set_min_width(ui.available_width());
@@ -38,6 +38,16 @@ impl NurApp {
                 ui.add_space(18.0);
                 self.footer(ui, palette);
             });
+        // A janela acompanha a altura do conteúdo (cresce/encolhe ao expandir
+        // seções como a ISO ou o aviso de dispositivo).
+        let desired_h = content.response.rect.height();
+        if (rect.height() - desired_h).abs() > 1.0 {
+            ui.ctx()
+                .send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
+                    rect.width(),
+                    desired_h,
+                )));
+        }
     }
 
     fn header(&mut self, ui: &mut egui::Ui, palette: Palette) {

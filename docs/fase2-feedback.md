@@ -12,5 +12,6 @@ Itens reportados durante a implementação da UI, para não atrapalhar o fluxo a
 | 6 | Ajustar **altura do select** | ✅ feito (`interact_size.y` + `button_padding`) |
 | 7 | Ajustar **altura e padding do input e do select** | ✅ feito (spacing global + `.margin` nos `TextEdit`) |
 | 8 | **Refatorar**: criar pasta de **componentes reutilizáveis** (button, input, select, etc.) | ✅ feito (`crates/ui/src/components/`: `FieldLabel`, `LabeledSelect`, `LabeledInput`, `PrimaryButton`, `SecondaryButton`, `DangerButton`) |
+| 9 | Janela deve **auto-ajustar a altura** conforme as seções expandem/encolhem | ✅ feito (mede a altura do conteúdo e envia `ViewportCommand::InnerSize`; boot=764px, format=654px) |
 
 > Validação visual de cada item é feita por screenshot headless (xvfb) — ver `docs/screenshots/`.

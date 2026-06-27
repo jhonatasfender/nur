@@ -106,6 +106,10 @@ impl NurApp {
                 self.phase = Phase::Working;
                 self.progress = 0.42;
             }
+            Ok("format") => {
+                self.selected = Some(0);
+                self.mode = Mode::Format;
+            }
             _ => {}
         }
     }
