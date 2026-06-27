@@ -1,5 +1,6 @@
 //! Aplicação egui do Nur (presenter; consome portas via Arc<dyn _>).
 
+use crate::captura::Capturador;
 use crate::theme::{ThemeKit, ThemePreference};
 use application::ports::UiState;
 use std::sync::Arc;
@@ -9,6 +10,7 @@ pub struct NurApp {
     estado: Arc<dyn UiState>,
     tema: ThemePreference,
     tema_instalado: bool,
+    capturador: Capturador,
 }
 
 impl NurApp {
@@ -19,6 +21,7 @@ impl NurApp {
             estado,
             tema: ThemePreference::Escuro,
             tema_instalado: false,
+            capturador: Capturador::new(),
         }
     }
 
@@ -42,6 +45,10 @@ impl eframe::App for NurApp {
             ThemeKit::install(ctx, self.tema);
             self.tema_instalado = true;
         }
+        // Captura de tela (F12 ou modo automático). Fecha ao concluir a captura automática.
+        if self.capturador.processar(ctx) {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
     }
 
     /// Desenha o painel central (eframe 0.35: ui recebe &mut Ui).
@@ -56,6 +63,11 @@ impl eframe::App for NurApp {
         ui.label("Dispositivos detectados:");
         for d in self.estado.dispositivos() {
             ui.label(d.descricao);
+        }
+        ui.separator();
+        ui.label("Pressione F12 para capturar a tela.");
+        if let Some(msg) = self.capturador.mensagem() {
+            ui.label(msg);
         }
     }
 }
