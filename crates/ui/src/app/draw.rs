@@ -149,32 +149,50 @@ impl NurApp {
             .corner_radius(egui::CornerRadius::same(8))
             .inner_margin(egui::Margin::same(4))
             .show(ui, |ui| {
-                ui.set_width(ui.available_width());
-                ui.columns(2, |cols| {
-                    self.mode_button(&mut cols[0], palette, Mode::Boot, "Criar bootável");
-                    self.mode_button(&mut cols[1], palette, Mode::Format, "Apenas formatar");
-                });
+                let full_w = ui.available_width();
+                let half = full_w / 2.0;
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(full_w, 30.0), egui::Sense::hover());
+                // Pílula deslizante: anima a posição entre as duas opções.
+                let target = if self.mode == Mode::Boot { 0.0 } else { half };
+                let x = ui
+                    .ctx()
+                    .animate_value_with_time(egui::Id::new("mode_pill"), target, 0.18);
+                let pill = egui::Rect::from_min_size(
+                    rect.min + egui::vec2(x, 0.0),
+                    egui::vec2(half, rect.height()),
+                );
+                ui.painter()
+                    .rect_filled(pill, egui::CornerRadius::same(6), palette.accent());
+                // Rótulos clicáveis sobre a pílula.
+                let options = [
+                    (Mode::Boot, "Criar bootável"),
+                    (Mode::Format, "Apenas formatar"),
+                ];
+                for (i, (mode, text)) in options.into_iter().enumerate() {
+                    let cell = egui::Rect::from_min_size(
+                        rect.min + egui::vec2(i as f32 * half, 0.0),
+                        egui::vec2(half, rect.height()),
+                    );
+                    if ui
+                        .interact(cell, egui::Id::new(("mode", i)), egui::Sense::click())
+                        .clicked()
+                    {
+                        self.mode = mode;
+                    }
+                    let color = if self.mode == mode {
+                        palette.on_accent()
+                    } else {
+                        palette.muted()
+                    };
+                    ui.painter().text(
+                        cell.center(),
+                        egui::Align2::CENTER_CENTER,
+                        text,
+                        egui::FontId::proportional(13.0),
+                        color,
+                    );
+                }
             });
-    }
-
-    fn mode_button(&mut self, ui: &mut egui::Ui, palette: Palette, mode: Mode, text: &str) {
-        let selected = self.mode == mode;
-        let bg = if selected {
-            palette.accent()
-        } else {
-            egui::Color32::TRANSPARENT
-        };
-        let fg = if selected {
-            palette.on_accent()
-        } else {
-            palette.muted()
-        };
-        let button = egui::Button::new(egui::RichText::new(text).color(fg).size(13.0).strong())
-            .fill(bg)
-            .stroke(egui::Stroke::NONE)
-            .corner_radius(egui::CornerRadius::same(6));
-        if ui.add_sized([ui.available_width(), 30.0], button).clicked() {
-            self.mode = mode;
-        }
     }
 }
