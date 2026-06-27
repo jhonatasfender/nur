@@ -1,0 +1,40 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/ui",
+    "crates/app",
+]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+authors = ["Jonatas <jhonatas.fender@gmail.com>"]
+
+[workspace.dependencies]
+thiserror = "2"
+anyhow = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+egui = "0.35"
+eframe = { version = "0.35", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+serde = { version = "1", features = ["derive"] }
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+
+[workspace.lints.rust]
+missing_docs = "deny"
+unreachable_pub = "deny"
+unsafe_code = "forbid"
