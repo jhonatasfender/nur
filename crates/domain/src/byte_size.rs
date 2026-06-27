@@ -20,17 +20,27 @@ impl ByteSize {
     /// Formata em unidade humana (ex.: "32.0 GB"). Base decimal (1000).
     #[must_use]
     pub fn humanize(self) -> String {
-        const UNIDADES: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
-        let mut valor = self.0 as f64;
-        let mut indice = 0;
-        while valor >= 1000.0 && indice < UNIDADES.len() - 1 {
-            valor /= 1000.0;
-            indice += 1;
+        const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
+        let mut value = self.0 as f64;
+        let mut index = 0usize;
+        while index < UNITS.len() - 1 {
+            let next = value / 1000.0;
+            if next < 1.0 {
+                break;
+            }
+            // Avoid showing "1000.0 <unit>" due to rounding.
+            if next >= 999.95 && index + 1 < UNITS.len() - 1 {
+                value = next / 1000.0;
+                index += 2;
+            } else {
+                value = next;
+                index += 1;
+            }
         }
-        if indice == 0 {
+        if index == 0 {
             format!("{} B", self.0)
         } else {
-            format!("{valor:.1} {}", UNIDADES[indice])
+            format!("{value:.1} {}", UNITS[index])
         }
     }
 }

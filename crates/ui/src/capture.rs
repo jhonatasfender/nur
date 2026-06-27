@@ -9,66 +9,75 @@ use std::sync::Arc;
 /// ativado pela variável de ambiente `NUR_CAPTURE=<arquivo.png>` — útil para
 /// validar a UI de forma headless: renderiza alguns frames, salva o PNG e
 /// sinaliza para a janela fechar.
-pub struct Capturador {
+pub struct Capturer {
     auto: Option<PathBuf>,
-    auto_solicitado: bool,
+    auto_requested: bool,
     frames: u32,
-    contador: u32,
-    ultima_msg: Option<String>,
+    counter: u32,
+    last_msg: Option<String>,
 }
 
-impl Capturador {
+impl Capturer {
     /// Cria o capturador, lendo `NUR_CAPTURE` para o modo automático.
     #[must_use]
     pub fn new() -> Self {
         let auto = std::env::var_os("NUR_CAPTURE").map(PathBuf::from);
         Self {
             auto,
-            auto_solicitado: false,
+            auto_requested: false,
             frames: 0,
-            contador: 0,
-            ultima_msg: None,
+            counter: 0,
+            last_msg: None,
         }
     }
 
     /// Indica se a captura automática está configurada.
     #[must_use]
-    pub fn auto_ativo(&self) -> bool {
+    pub fn auto_enabled(&self) -> bool {
         self.auto.is_some()
     }
 
     /// Mensagem de status da última captura, se houver.
     #[must_use]
-    pub fn mensagem(&self) -> Option<&str> {
-        self.ultima_msg.as_deref()
+    pub fn message(&self) -> Option<&str> {
+        self.last_msg.as_deref()
     }
 
     /// Processa um frame: trata F12 / modo automático e salva screenshots prontos.
     ///
     /// Retorna `true` quando a captura automática concluiu (a janela deve fechar).
-    pub fn processar(&mut self, ctx: &egui::Context) -> bool {
+    pub fn process(&mut self, ctx: &egui::Context) -> bool {
         if ctx.input(|i| i.key_pressed(egui::Key::F12)) {
-            Self::solicitar(ctx);
+            Self::request(ctx);
         }
         if self.auto.is_some() {
+            // Failsafe: se o screenshot não chegar (ex.: sem framebuffer),
+            // aborta em vez de girar para sempre.
+            const MAX_FRAMES_AUTO: u32 = 600;
             self.frames += 1;
             // Espera a UI estabilizar antes de capturar no modo automático.
-            if self.frames >= 3 && !self.auto_solicitado {
-                Self::solicitar(ctx);
-                self.auto_solicitado = true;
+            if self.frames >= 3 && !self.auto_requested {
+                Self::request(ctx);
+                self.auto_requested = true;
+            }
+            if self.frames > MAX_FRAMES_AUTO {
+                eprintln!(
+                    "NUR_CAPTURE: screenshot não chegou após {MAX_FRAMES_AUTO} frames; abortando."
+                );
+                return true;
             }
             // egui é reativo; força frames para o screenshot chegar.
             ctx.request_repaint();
         }
-        self.salvar_prontos(ctx)
+        self.save_ready(ctx)
     }
 
-    fn solicitar(ctx: &egui::Context) {
+    fn request(ctx: &egui::Context) {
         ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
     }
 
-    fn salvar_prontos(&mut self, ctx: &egui::Context) -> bool {
-        let imagens: Vec<Arc<egui::ColorImage>> = ctx.input(|i| {
+    fn save_ready(&mut self, ctx: &egui::Context) -> bool {
+        let images: Vec<Arc<egui::ColorImage>> = ctx.input(|i| {
             i.raw
                 .events
                 .iter()
@@ -78,41 +87,41 @@ impl Capturador {
                 })
                 .collect()
         });
-        let mut auto_concluido = false;
-        for imagem in imagens {
-            let destino = self.proximo_destino();
-            match Self::salvar_png(&imagem, &destino) {
+        let mut auto_done = false;
+        for image in images {
+            let dest = self.next_destination();
+            match Self::save_png(&image, &dest) {
                 Ok(()) => {
-                    self.ultima_msg = Some(format!("captura salva em {}", destino.display()));
-                    auto_concluido = self.auto.is_some();
+                    self.last_msg = Some(format!("captura salva em {}", dest.display()));
+                    auto_done = self.auto.is_some();
                 }
-                Err(e) => self.ultima_msg = Some(format!("falha na captura: {e}")),
+                Err(e) => self.last_msg = Some(format!("falha na captura: {e}")),
             }
         }
-        auto_concluido
+        auto_done
     }
 
-    fn proximo_destino(&mut self) -> PathBuf {
-        if let Some(caminho) = &self.auto {
-            return caminho.clone();
+    fn next_destination(&mut self) -> PathBuf {
+        if let Some(path) = &self.auto {
+            return path.clone();
         }
-        self.contador += 1;
-        PathBuf::from(format!("nur-screenshot-{:03}.png", self.contador))
+        self.counter += 1;
+        PathBuf::from(format!("nur-screenshot-{:03}.png", self.counter))
     }
 
-    fn salvar_png(imagem: &egui::ColorImage, destino: &Path) -> Result<(), image::ImageError> {
-        let [largura, altura] = imagem.size;
+    fn save_png(image: &egui::ColorImage, dest: &Path) -> Result<(), image::ImageError> {
+        let [width, height] = image.size;
         image::save_buffer(
-            destino,
-            imagem.as_raw(),
-            largura as u32,
-            altura as u32,
+            dest,
+            image.as_raw(),
+            width as u32,
+            height as u32,
             image::ExtendedColorType::Rgba8,
         )
     }
 }
 
-impl Default for Capturador {
+impl Default for Capturer {
     fn default() -> Self {
         Self::new()
     }

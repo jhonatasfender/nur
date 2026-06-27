@@ -1,12 +1,12 @@
 use super::*;
 
 #[test]
-fn alterna_entre_claro_e_escuro() {
-    assert_eq!(ThemePreference::Claro.alternar(), ThemePreference::Escuro);
-    assert_eq!(ThemePreference::Escuro.alternar(), ThemePreference::Claro);
+fn toggles_between_light_and_dark() {
+    assert_eq!(ThemePreference::Light.toggle(), ThemePreference::Dark);
+    assert_eq!(ThemePreference::Dark.toggle(), ThemePreference::Light);
 }
 
 #[test]
-fn preferencia_resolve_palette() {
-    assert_eq!(ThemePreference::Escuro.palette(), Palette::escura());
+fn preference_resolves_palette() {
+    assert_eq!(ThemePreference::Dark.palette(), Palette::dark());
 }

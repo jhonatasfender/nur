@@ -1,8 +1,8 @@
 //! Adapter stub do DiskService (dados canônicos para preview/desenvolvimento).
 
-use application::erros::ErroDisco;
+use application::errors::DiskError;
 use application::ports::DiskService;
-use domain::{ByteSize, CaminhoDispositivo, Dispositivo};
+use domain::{ByteSize, Device, DevicePath};
 
 /// Implementação stub que devolve dispositivos fixos (sem tocar o SO).
 pub struct DiskServiceStub;
@@ -22,16 +22,16 @@ impl Default for DiskServiceStub {
 }
 
 impl DiskService for DiskServiceStub {
-    fn listar_dispositivos(&self) -> Result<Vec<Dispositivo>, ErroDisco> {
+    fn list_devices(&self) -> Result<Vec<Device>, DiskError> {
         Ok(vec![
-            Dispositivo::new(
-                CaminhoDispositivo::new("/dev/sdb".to_owned()),
+            Device::new(
+                DevicePath::new("/dev/sdb".to_owned()),
                 "SanDisk Ultra".to_owned(),
                 ByteSize::from_bytes(32_000_000_000),
                 true,
             ),
-            Dispositivo::new(
-                CaminhoDispositivo::new("/dev/sdc".to_owned()),
+            Device::new(
+                DevicePath::new("/dev/sdc".to_owned()),
                 "Kingston DataTraveler".to_owned(),
                 ByteSize::from_bytes(16_000_000_000),
                 true,

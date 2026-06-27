@@ -1,9 +1,9 @@
 use super::*;
 
 #[test]
-fn devolve_dois_dispositivos_canonicos() {
+fn returns_two_canonical_devices() {
     let stub = DiskServiceStub::new();
-    let dispositivos = stub.listar_dispositivos().unwrap();
-    assert_eq!(dispositivos.len(), 2);
-    assert_eq!(dispositivos[0].caminho().as_str(), "/dev/sdb");
+    let devices = stub.list_devices().unwrap();
+    assert_eq!(devices.len(), 2);
+    assert_eq!(devices[0].path().as_str(), "/dev/sdb");
 }

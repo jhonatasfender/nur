@@ -4,4 +4,4 @@ mod disk_service;
 mod ui_state;
 
 pub use disk_service::DiskService;
-pub use ui_state::{DispositivoView, UiState};
+pub use ui_state::{DeviceView, UiState};

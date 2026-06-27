@@ -2,32 +2,32 @@
 
 /// Erro de rótulo de volume inválido.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
-pub enum RotuloInvalido {
+pub enum InvalidLabel {
     /// O rótulo estava vazio.
     #[error("rótulo vazio")]
-    Vazio,
+    Empty,
     /// O rótulo excede 11 caracteres.
     #[error("rótulo excede 11 caracteres")]
-    MuitoLongo,
+    TooLong,
 }
 
 /// Rótulo de volume válido (1–11 caracteres).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RotuloVolume(String);
+pub struct VolumeLabel(String);
 
-impl RotuloVolume {
+impl VolumeLabel {
     /// Valida e cria um rótulo. Erros: vazio ou acima de 11 caracteres.
     ///
     /// # Errors
-    /// Retorna [`RotuloInvalido`] quando a string não respeita o limite.
-    pub fn parse(texto: &str) -> Result<Self, RotuloInvalido> {
-        if texto.is_empty() {
-            return Err(RotuloInvalido::Vazio);
+    /// Retorna [`InvalidLabel`] quando a string não respeita o limite.
+    pub fn parse(text: &str) -> Result<Self, InvalidLabel> {
+        if text.is_empty() {
+            return Err(InvalidLabel::Empty);
         }
-        if texto.chars().count() > 11 {
-            return Err(RotuloInvalido::MuitoLongo);
+        if text.chars().count() > 11 {
+            return Err(InvalidLabel::TooLong);
         }
-        Ok(Self(texto.to_owned()))
+        Ok(Self(text.to_owned()))
     }
 
     /// Retorna o rótulo como string.

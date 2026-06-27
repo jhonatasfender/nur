@@ -6,18 +6,18 @@ use crate::theme::Palette;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ThemePreference {
     /// Tema claro.
-    Claro,
+    Light,
     /// Tema escuro.
-    Escuro,
+    Dark,
 }
 
 impl ThemePreference {
     /// Alterna entre claro e escuro.
     #[must_use]
-    pub const fn alternar(self) -> Self {
+    pub const fn toggle(self) -> Self {
         match self {
-            Self::Claro => Self::Escuro,
-            Self::Escuro => Self::Claro,
+            Self::Light => Self::Dark,
+            Self::Dark => Self::Light,
         }
     }
 
@@ -25,8 +25,8 @@ impl ThemePreference {
     #[must_use]
     pub const fn palette(self) -> Palette {
         match self {
-            Self::Claro => Palette::clara(),
-            Self::Escuro => Palette::escura(),
+            Self::Light => Palette::light(),
+            Self::Dark => Palette::dark(),
         }
     }
 }
@@ -39,12 +39,12 @@ impl ThemeKit {
     pub fn install(ctx: &egui::Context, pref: ThemePreference) {
         let palette = pref.palette();
         let mut visuals = match pref {
-            ThemePreference::Claro => egui::Visuals::light(),
-            ThemePreference::Escuro => egui::Visuals::dark(),
+            ThemePreference::Light => egui::Visuals::light(),
+            ThemePreference::Dark => egui::Visuals::dark(),
         };
-        visuals.panel_fill = palette.fundo;
-        visuals.window_fill = palette.superficie;
-        visuals.override_text_color = Some(palette.texto);
+        visuals.panel_fill = palette.background();
+        visuals.window_fill = palette.surface();
+        visuals.override_text_color = Some(palette.text());
         ctx.set_visuals(visuals);
     }
 }

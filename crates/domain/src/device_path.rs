@@ -2,13 +2,13 @@
 
 /// Caminho de dispositivo de bloco no sistema.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CaminhoDispositivo(String);
+pub struct DevicePath(String);
 
-impl CaminhoDispositivo {
+impl DevicePath {
     /// Cria a partir de um caminho já validado pelo adapter de SO.
     #[must_use]
-    pub fn new(caminho: String) -> Self {
-        Self(caminho)
+    pub fn new(path: String) -> Self {
+        Self(path)
     }
 
     /// Retorna o caminho como string.

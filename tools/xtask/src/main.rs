@@ -5,11 +5,12 @@ mod line_limit {
 }
 
 use line_limit::rule::LineLimitRule;
+use std::path::Path;
 
 fn main() -> std::process::ExitCode {
-    let comando = std::env::args().nth(1).unwrap_or_default();
-    match comando.as_str() {
-        "line-limit" => executar_line_limit(),
+    let command = std::env::args().nth(1).unwrap_or_default();
+    match command.as_str() {
+        "line-limit" => run_line_limit(),
         _ => {
             eprintln!("uso: cargo xtask line-limit");
             std::process::ExitCode::FAILURE
@@ -17,9 +18,9 @@ fn main() -> std::process::ExitCode {
     }
 }
 
-fn executar_line_limit() -> std::process::ExitCode {
-    let raiz = Path::new("crates");
-    match LineLimitRule::check(raiz) {
+fn run_line_limit() -> std::process::ExitCode {
+    let root = Path::new("crates");
+    match LineLimitRule::check(root) {
         Ok(v) if v.is_empty() => {
             println!("line-limit: OK");
             std::process::ExitCode::SUCCESS
@@ -36,5 +37,3 @@ fn executar_line_limit() -> std::process::ExitCode {
         }
     }
 }
-
-use std::path::Path;

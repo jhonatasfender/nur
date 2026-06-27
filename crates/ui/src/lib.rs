@@ -1,8 +1,8 @@
 //! Camada de apresentação (egui) do Nur.
 
 mod app;
-mod captura;
+mod capture;
 pub mod theme;
 
 pub use app::NurApp;
-pub use captura::Capturador;
+pub use capture::Capturer;

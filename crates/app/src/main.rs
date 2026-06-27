@@ -14,15 +14,15 @@ fn main() -> std::process::ExitCode {
     };
     let _guard = runtime.enter();
 
-    let estado = match window::UiStateAoVivo::montar() {
-        Ok(estado) => Arc::new(estado),
+    let state = match window::LiveUiState::build() {
+        Ok(state) => Arc::new(state),
         Err(e) => {
             eprintln!("erro ao montar estado: {e}");
             return std::process::ExitCode::FAILURE;
         }
     };
 
-    match window::abrir(estado) {
+    match window::open(state) {
         Ok(()) => std::process::ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("erro: {e}");

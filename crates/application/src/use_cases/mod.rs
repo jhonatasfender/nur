@@ -1,5 +1,5 @@
 //! Casos de uso da aplicação.
 
-mod listar_dispositivos;
+mod list_devices;
 
-pub use listar_dispositivos::ListarDispositivos;
+pub use list_devices::ListDevices;

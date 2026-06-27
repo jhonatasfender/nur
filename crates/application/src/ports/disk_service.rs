@@ -1,13 +1,13 @@
 //! Porta de acesso ao disco (implementada na infraestrutura).
 
-use crate::erros::ErroDisco;
-use domain::Dispositivo;
+use crate::errors::DiskError;
+use domain::Device;
 
 /// Serviço de disco: enumera dispositivos e (futuramente) grava/formata.
 pub trait DiskService: Send + Sync {
     /// Lista os dispositivos removíveis disponíveis.
     ///
     /// # Errors
-    /// Retorna [`ErroDisco`] se o backend falhar.
-    fn listar_dispositivos(&self) -> Result<Vec<Dispositivo>, ErroDisco>;
+    /// Retorna [`DiskError`] se o backend falhar.
+    fn list_devices(&self) -> Result<Vec<Device>, DiskError>;
 }

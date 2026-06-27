@@ -1,12 +1,12 @@
 use super::*;
 
 #[test]
-fn temas_tem_fundos_diferentes() {
-    assert_ne!(Palette::clara().fundo, Palette::escura().fundo);
+fn themes_have_different_backgrounds() {
+    assert_ne!(Palette::light().background(), Palette::dark().background());
 }
 
 #[test]
-fn sucesso_e_verde_nos_dois_temas() {
+fn success_is_green_in_both_themes() {
     // Verde de sucesso é o mesmo token (#16A34A) nos dois temas.
-    assert_eq!(Palette::clara().sucesso, Palette::escura().sucesso);
+    assert_eq!(Palette::light().success(), Palette::dark().success());
 }

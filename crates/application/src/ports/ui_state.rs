@@ -2,15 +2,33 @@
 
 /// Projeção de um dispositivo para exibição na UI (sem tipos de domínio).
 #[derive(Debug, Clone)]
-pub struct DispositivoView {
+pub struct DeviceView {
+    path: String,
+    description: String,
+}
+
+impl DeviceView {
+    /// Cria uma projeção com caminho e descrição.
+    #[must_use]
+    pub fn new(path: String, description: String) -> Self {
+        Self { path, description }
+    }
+
     /// Caminho do dispositivo (ex.: `/dev/sdb`).
-    pub caminho: String,
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
     /// Descrição legível (modelo — tamanho (caminho)).
-    pub descricao: String,
+    #[must_use]
+    pub fn description(&self) -> &str {
+        &self.description
+    }
 }
 
 /// Estado lido pela UI a cada frame.
 pub trait UiState: Send + Sync {
     /// Lista de dispositivos para popular o seletor.
-    fn dispositivos(&self) -> Vec<DispositivoView>;
+    fn devices(&self) -> Vec<DeviceView>;
 }
