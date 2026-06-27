@@ -68,12 +68,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo doc --no-deps --workspace
 
-  line-limit:
+  xtask-lints:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo xtask line-limit
+      - run: cargo xtask check # line-limit + pub-fields
 
   deny:
     runs-on: ubuntu-latest

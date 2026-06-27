@@ -20,7 +20,8 @@ Copiado verbatim das decisões (ver `docs/decisoes/`). Vale para TODA task:
 - **Limite de ~199 linhas por arquivo `.rs`** (xtask line-limit).
 - **OOP estrito:** sem função livre exceto `fn main`. Helpers viram associated fn de struct/enum.
 - **Testes em arquivo irmão:** `foo.rs` declara `#[cfg(test)] mod tests;`; os testes vão em `foo/tests.rs` com `use super::*;`.
-- **Idioma:** identificadores e comentários em **pt-BR**; comentários explicam o "porquê".
+- **Idioma (revisado 2026-06-27, ver ADR 0008):** **código em inglês** (identificadores, módulos/arquivos, nomes de teste); **pt-BR** só em comentários, logs e textos de UI.
+- **Encapsulamento:** zero campos `pub` (campos privados + getters), exigido por `cargo xtask pub-fields`.
 - **`ui` nunca depende de `infrastructure`.** Só `app` conhece todos os crates.
 
 ---
