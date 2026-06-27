@@ -1,6 +1,7 @@
 //! Seção de status (barra de progresso) e footer (Fechar/Iniciar).
 
 use super::{Mode, NurApp, Phase};
+use crate::components::{PrimaryButton, SecondaryButton};
 use crate::theme::Palette;
 
 impl NurApp {
@@ -81,31 +82,12 @@ impl NurApp {
         let total = ui.available_width();
         let close_w = (total - 12.0) * 0.4;
         let start_w = (total - 12.0) * 0.6;
+        let ready = self.ready();
         ui.horizontal(|ui| {
-            let close = egui::Button::new(
-                egui::RichText::new("Fechar")
-                    .color(palette.text())
-                    .size(13.0)
-                    .strong(),
-            )
-            .fill(palette.control())
-            .corner_radius(egui::CornerRadius::same(8));
-            if ui.add_sized([close_w, 38.0], close).clicked() {
+            if SecondaryButton::show(ui, palette, "Fechar", close_w) {
                 ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            let start = egui::Button::new(
-                egui::RichText::new("Iniciar")
-                    .color(palette.on_accent())
-                    .size(13.0)
-                    .strong(),
-            )
-            .fill(palette.accent())
-            .corner_radius(egui::CornerRadius::same(8));
-            if ui
-                .add_enabled_ui(self.ready(), |ui| ui.add_sized([start_w, 38.0], start))
-                .inner
-                .clicked()
-            {
+            if PrimaryButton::show(ui, palette, "Iniciar", start_w, ready) {
                 self.open_confirm();
             }
         });

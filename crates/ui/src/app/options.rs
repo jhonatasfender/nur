@@ -1,6 +1,7 @@
 //! Seções de imagem ISO e opções de formato.
 
 use super::{Mode, NurApp};
+use crate::components::{FieldLabel, LabeledInput, LabeledSelect};
 use crate::theme::Palette;
 
 const PARTITIONS: [&str; 2] = ["GPT", "MBR"];
@@ -12,7 +13,7 @@ impl NurApp {
         if self.mode != Mode::Boot {
             return;
         }
-        Self::field_label(ui, palette, "IMAGEM ISO");
+        FieldLabel::show(ui, palette, "IMAGEM ISO");
         let main = if self.iso_selected {
             "ubuntu-24.04-desktop-amd64.iso \u{00B7} 5,8 GB"
         } else {
@@ -50,9 +51,9 @@ impl NurApp {
     }
 
     pub(super) fn options_section(&mut self, ui: &mut egui::Ui, palette: Palette) {
-        Self::field_label(ui, palette, "OPÇÕES DE FORMATO");
+        FieldLabel::show(ui, palette, "OPÇÕES DE FORMATO");
         ui.columns(2, |cols| {
-            Self::combo(
+            LabeledSelect::show(
                 &mut cols[0],
                 palette,
                 "partition",
@@ -60,7 +61,7 @@ impl NurApp {
                 &PARTITIONS,
                 &mut self.partition,
             );
-            Self::combo(
+            LabeledSelect::show(
                 &mut cols[1],
                 palette,
                 "target",
@@ -71,7 +72,7 @@ impl NurApp {
         });
         ui.add_space(12.0);
         ui.columns(2, |cols| {
-            Self::combo(
+            LabeledSelect::show(
                 &mut cols[0],
                 palette,
                 "fs",
@@ -79,17 +80,7 @@ impl NurApp {
                 &FILESYSTEMS,
                 &mut self.filesystem,
             );
-            cols[1].label(
-                egui::RichText::new("Rótulo do volume")
-                    .color(palette.muted())
-                    .size(11.0),
-            );
-            cols[1].add_space(3.0);
-            cols[1].add(
-                egui::TextEdit::singleline(&mut self.label)
-                    .margin(egui::Margin::symmetric(12, 9))
-                    .desired_width(f32::INFINITY),
-            );
+            LabeledInput::show(&mut cols[1], palette, "Rótulo do volume", &mut self.label);
         });
         ui.add_space(12.0);
         ui.checkbox(
@@ -98,26 +89,5 @@ impl NurApp {
                 .color(palette.text())
                 .size(13.0),
         );
-    }
-
-    // Combo com rótulo pequeno acima (uma célula do grid).
-    fn combo(
-        ui: &mut egui::Ui,
-        palette: Palette,
-        id: &str,
-        label: &str,
-        options: &[&str],
-        value: &mut usize,
-    ) {
-        ui.label(egui::RichText::new(label).color(palette.muted()).size(11.0));
-        ui.add_space(3.0);
-        egui::ComboBox::from_id_salt(id)
-            .selected_text(options[*value])
-            .width(ui.available_width())
-            .show_ui(ui, |ui| {
-                for (i, option) in options.iter().enumerate() {
-                    ui.selectable_value(value, i, *option);
-                }
-            });
     }
 }

@@ -1,6 +1,7 @@
 //! Card central e seções de topo (header, dispositivo, modo).
 
 use super::{Mode, NurApp};
+use crate::components::FieldLabel;
 use crate::theme::Palette;
 
 impl NurApp {
@@ -106,7 +107,7 @@ impl NurApp {
     }
 
     fn device_selector(&mut self, ui: &mut egui::Ui, palette: Palette) {
-        Self::field_label(ui, palette, "DISPOSITIVO");
+        FieldLabel::show(ui, palette, "DISPOSITIVO");
         let devices = self.state.devices();
         let selected_text = self.selected.and_then(|i| devices.get(i)).map_or_else(
             || "— Selecione o pendrive —".to_owned(),
@@ -131,7 +132,7 @@ impl NurApp {
     }
 
     fn mode_selector(&mut self, ui: &mut egui::Ui, palette: Palette) {
-        Self::field_label(ui, palette, "O QUE DESEJA FAZER?");
+        FieldLabel::show(ui, palette, "O QUE DESEJA FAZER?");
         egui::Frame::NONE
             .fill(palette.control())
             .corner_radius(egui::CornerRadius::same(8))
@@ -164,16 +165,5 @@ impl NurApp {
         if ui.add_sized([ui.available_width(), 30.0], button).clicked() {
             self.mode = mode;
         }
-    }
-
-    // Rótulo pequeno em maiúsculas, estilo "field label" do protótipo.
-    pub(super) fn field_label(ui: &mut egui::Ui, palette: Palette, text: &str) {
-        ui.label(
-            egui::RichText::new(text)
-                .color(palette.muted())
-                .size(11.0)
-                .strong(),
-        );
-        ui.add_space(5.0);
     }
 }

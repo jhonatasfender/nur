@@ -2,6 +2,7 @@
 
 mod app;
 mod capture;
+mod components;
 pub mod theme;
 
 pub use app::NurApp;

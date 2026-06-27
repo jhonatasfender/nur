@@ -1,6 +1,7 @@
 //! Modal de confirmação ("digite APAGAR") e início da operação.
 
 use super::{NurApp, Phase};
+use crate::components::{DangerButton, SecondaryButton};
 use crate::theme::Palette;
 
 impl NurApp {
@@ -59,19 +60,12 @@ impl NurApp {
                 ui.add_space(14.0);
                 let ok = self.confirm_text.trim().eq_ignore_ascii_case("APAGAR");
                 ui.columns(2, |cols| {
-                    let cancel_btn = egui::Button::new(egui::RichText::new("Cancelar").color(palette.text()).size(13.0).strong())
-                        .fill(palette.control())
-                        .corner_radius(egui::CornerRadius::same(8));
-                    if cols[0].add_sized([cols[0].available_width(), 38.0], cancel_btn).clicked() {
+                    let cancel_w = cols[0].available_width();
+                    if SecondaryButton::show(&mut cols[0], palette, "Cancelar", cancel_w) {
                         cancel = true;
                     }
-                    let confirm_btn = egui::Button::new(egui::RichText::new("Apagar e gravar").color(egui::Color32::WHITE).size(13.0).strong())
-                        .fill(egui::Color32::from_rgb(0xDC, 0x26, 0x26))
-                        .corner_radius(egui::CornerRadius::same(8));
-                    let resp = cols[1].add_enabled_ui(ok, |ui| {
-                        ui.add_sized([ui.available_width(), 38.0], confirm_btn)
-                    });
-                    if resp.inner.clicked() {
+                    let confirm_w = cols[1].available_width();
+                    if DangerButton::show(&mut cols[1], "Apagar e gravar", confirm_w, ok) {
                         confirm = true;
                     }
                 });
