@@ -1,15 +1,18 @@
-//! Captura de tela da janela do Nur (tecla F12 e modo automático via env).
+//! Captura de tela da janela do Nur (tecla F12 e modo automático).
 
-use std::path::{Path, PathBuf};
+use application::ports::ScreenshotWriter;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 /// Coordena capturas de tela da janela.
 ///
 /// Dispara por **F12** (captura manual, numerada) ou pelo **modo automático**,
-/// ativado pela variável de ambiente `NUR_CAPTURE=<arquivo.png>` — útil para
-/// validar a UI de forma headless: renderiza alguns frames, salva o PNG e
-/// sinaliza para a janela fechar.
+/// quando um destino é injetado pelo composition root — útil para validar a UI
+/// de forma headless: renderiza alguns frames, grava o PNG e sinaliza para a
+/// janela fechar. A gravação em arquivo é delegada ao [`ScreenshotWriter`], de
+/// modo que a camada de apresentação não toca o sistema de arquivos.
 pub struct Capturer {
+    writer: Arc<dyn ScreenshotWriter>,
     auto: Option<PathBuf>,
     auto_requested: bool,
     frames: u32,
@@ -20,11 +23,11 @@ pub struct Capturer {
 }
 
 impl Capturer {
-    /// Cria o capturador, lendo `NUR_CAPTURE` para o modo automático.
+    /// Cria o capturador com o gravador injetado e o destino automático opcional.
     #[must_use]
-    pub fn new() -> Self {
-        let auto = std::env::var_os("NUR_CAPTURE").map(PathBuf::from);
+    pub fn new(writer: Arc<dyn ScreenshotWriter>, auto: Option<PathBuf>) -> Self {
         Self {
+            writer,
             auto,
             auto_requested: false,
             frames: 0,
@@ -32,6 +35,11 @@ impl Capturer {
             last_msg: None,
             pending: false,
         }
+    }
+
+    /// Define (ou limpa) o destino da captura automática.
+    pub(crate) fn set_auto(&mut self, auto: Option<PathBuf>) {
+        self.auto = auto;
     }
 
     /// Indica se a captura automática está configurada.
@@ -106,7 +114,11 @@ impl Capturer {
             // O evento chegou: a captura deixa de estar pendente.
             self.pending = false;
             let dest = self.next_destination();
-            match Self::save_png(&image, &dest) {
+            let [width, height] = image.size;
+            match self
+                .writer
+                .write(image.as_raw(), width as u32, height as u32, &dest)
+            {
                 Ok(()) => {
                     self.last_msg = Some(format!("captura salva em {}", dest.display()));
                     auto_done = self.auto.is_some();
@@ -117,30 +129,14 @@ impl Capturer {
         auto_done
     }
 
+    // Destino do PNG: o caminho automático injetado ou um nome numerado relativo
+    // ao diretório atual do processo (resolvido pelo gravador, na infraestrutura).
     fn next_destination(&mut self) -> PathBuf {
         if let Some(path) = &self.auto {
             return path.clone();
         }
         self.counter += 1;
-        let name = format!("nur-screenshot-{:03}.png", self.counter);
-        std::env::current_dir().map_or_else(|_| PathBuf::from(&name), |dir| dir.join(&name))
-    }
-
-    fn save_png(image: &egui::ColorImage, dest: &Path) -> Result<(), image::ImageError> {
-        let [width, height] = image.size;
-        image::save_buffer(
-            dest,
-            image.as_raw(),
-            width as u32,
-            height as u32,
-            image::ExtendedColorType::Rgba8,
-        )
-    }
-}
-
-impl Default for Capturer {
-    fn default() -> Self {
-        Self::new()
+        PathBuf::from(format!("nur-screenshot-{:03}.png", self.counter))
     }
 }
 

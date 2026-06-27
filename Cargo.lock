@@ -1111,6 +1111,7 @@ version = "0.1.0"
 dependencies = [
  "application",
  "domain",
+ "image",
 ]
 
 [[package]]
@@ -2413,7 +2414,6 @@ dependencies = [
  "application",
  "eframe",
  "egui",
- "image",
  "serde",
 ]
 

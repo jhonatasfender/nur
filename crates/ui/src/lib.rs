@@ -5,5 +5,5 @@ mod capture;
 mod components;
 pub mod theme;
 
-pub use app::NurApp;
+pub use app::{DemoScenario, NurApp};
 pub use capture::Capturer;
