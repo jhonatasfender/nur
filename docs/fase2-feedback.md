@@ -14,5 +14,6 @@ Itens reportados durante a implementação da UI, para não atrapalhar o fluxo a
 | 8 | **Refatorar**: criar pasta de **componentes reutilizáveis** (button, input, select, etc.) | ✅ feito (`crates/ui/src/components/`: `FieldLabel`, `LabeledSelect`, `LabeledInput`, `PrimaryButton`, `SecondaryButton`, `DangerButton`) |
 | 9 | Janela deve **auto-ajustar a altura** conforme as seções expandem/encolhem | ✅ feito (mede a altura do conteúdo e envia `ViewportCommand::InnerSize`; boot=764px, format=654px) |
 | 10 | **F12 não tirava print** | ✅ feito (faltava `request_repaint` após pedir o screenshot — sem ele o frame que recebe o evento não rodava; agora há um estado `pending`. Print salvo em caminho absoluto, com mensagem "captura salva em …") |
+| 11 | No tema **branco**, algumas bordas de elementos não apareciam | ✅ feito (o container do seletor de modo era branco sobre card branco sem borda; adicionada `stroke` de borda) |
 
 > Validação visual de cada item é feita por screenshot headless (xvfb) — ver `docs/screenshots/`.

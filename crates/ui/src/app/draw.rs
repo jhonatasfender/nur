@@ -145,6 +145,7 @@ impl NurApp {
         FieldLabel::show(ui, palette, "O QUE DESEJA FAZER?");
         egui::Frame::NONE
             .fill(palette.control())
+            .stroke(egui::Stroke::new(1.0, palette.border()))
             .corner_radius(egui::CornerRadius::same(8))
             .inner_margin(egui::Margin::same(4))
             .show(ui, |ui| {
