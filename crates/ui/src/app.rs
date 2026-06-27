@@ -1,4 +1,4 @@
-//! Aplicação egui do Nur (presenter; consome portas via Arc<dyn _>).
+//! Aplicação egui do Nur (presenter; consome portas via `Arc<dyn _>`).
 
 use crate::captura::Capturador;
 use crate::theme::{ThemeKit, ThemePreference};

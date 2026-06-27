@@ -67,9 +67,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "application",
- "domain",
  "eframe",
- "egui",
  "infrastructure",
  "tokio",
  "ui",
@@ -2413,7 +2411,6 @@ name = "ui"
 version = "0.1.0"
 dependencies = [
  "application",
- "domain",
  "eframe",
  "egui",
  "image",

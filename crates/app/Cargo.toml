@@ -11,12 +11,10 @@ name = "nur"
 path = "src/main.rs"
 
 [dependencies]
-domain = { path = "../domain" }
 application = { path = "../application" }
 infrastructure = { path = "../infrastructure" }
 ui = { path = "../ui" }
 eframe.workspace = true
-egui.workspace = true
 tokio.workspace = true
 anyhow.workspace = true
 
