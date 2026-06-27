@@ -6,6 +6,7 @@ use application::ports::UiState;
 use std::sync::Arc;
 
 mod draw;
+mod header;
 mod modal;
 mod options;
 mod status;
