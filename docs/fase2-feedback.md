@@ -1,0 +1,22 @@
+# Fase 2 — Feedback do usuário (lista de TODOs)
+
+Itens reportados durante a implementação da UI, para não atrapalhar o fluxo atual.
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Layout deve seguir o protótipo **à risca** | ✅ feito |
+| 2 | Baixar/embutir uma **fonte bonita** (Inter) | ✅ feito |
+| 3 | Remover a **barra de título preta** (todas as plataformas) | ✅ feito (`with_decorations(false)` + header arrastável) |
+| 4 | Janela com **bordas arredondadas** (estava "quadradona") | ✅ feito (janela transparente + card arredondado) |
+| 5 | **Dark/light não funcionava** | ✅ feito (lock de tema via `set_visuals_of`+`set_theme`; e drag do header roubava o clique do toggle) |
+| 6 | Ajustar **altura do select** | ✅ feito (`interact_size.y` + `button_padding`) |
+| 7 | Ajustar **altura e padding do input e do select** | ✅ feito (spacing global + `.margin` nos `TextEdit`) |
+| 8 | **Refatorar**: criar pasta de **componentes reutilizáveis** (button, input, select, etc.) | ✅ feito (`crates/ui/src/components/`: `FieldLabel`, `LabeledSelect`, `LabeledInput`, `PrimaryButton`, `SecondaryButton`, `DangerButton`) |
+| 9 | Janela deve **auto-ajustar a altura** conforme as seções expandem/encolhem | ✅ feito (mede a altura do conteúdo e envia `ViewportCommand::InnerSize`; boot=764px, format=654px) |
+| 10 | **F12 não tirava print** | ✅ feito (faltava `request_repaint` após pedir o screenshot — sem ele o frame que recebe o evento não rodava; agora há um estado `pending`. Print salvo em caminho absoluto, com mensagem "captura salva em …") |
+| 11 | No tema **branco**, algumas bordas de elementos não apareciam | ✅ feito (o container do seletor de modo era branco sobre card branco sem borda; adicionada `stroke` de borda) |
+| 12 | F12 ainda não tirava print (desktop intercepta a tecla) | ✅ feito (**botão de captura** no header — ícone de câmera — via `Capturer::capture_now`; F12 segue funcionando onde não é interceptado) |
+| 13 | Componentizar e estilizar melhor o "radiobutton" (checkbox) | ✅ feito (componente `Checkbox` desenhado à mão: caixa arredondada + check, padding consistente) |
+| 14 | Animação da **pílula deslizante** no seletor de modo | ✅ feito (`animate_value_with_time`) |
+
+> Validação visual de cada item é feita por screenshot headless (xvfb) — ver `docs/screenshots/`.

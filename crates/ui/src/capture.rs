@@ -15,6 +15,8 @@ pub struct Capturer {
     frames: u32,
     counter: u32,
     last_msg: Option<String>,
+    // Há uma captura solicitada aguardando o evento `Event::Screenshot`.
+    pending: bool,
 }
 
 impl Capturer {
@@ -28,6 +30,7 @@ impl Capturer {
             frames: 0,
             counter: 0,
             last_msg: None,
+            pending: false,
         }
     }
 
@@ -49,6 +52,7 @@ impl Capturer {
     pub fn process(&mut self, ctx: &egui::Context) -> bool {
         if ctx.input(|i| i.key_pressed(egui::Key::F12)) {
             Self::request(ctx);
+            self.pending = true;
         }
         if self.auto.is_some() {
             // Failsafe: se o screenshot não chegar (ex.: sem framebuffer),
@@ -59,6 +63,7 @@ impl Capturer {
             if self.frames >= 3 && !self.auto_requested {
                 Self::request(ctx);
                 self.auto_requested = true;
+                self.pending = true;
             }
             if self.frames > MAX_FRAMES_AUTO {
                 eprintln!(
@@ -66,10 +71,19 @@ impl Capturer {
                 );
                 return true;
             }
-            // egui é reativo; força frames para o screenshot chegar.
+        }
+        // egui é reativo; enquanto há captura pendente, força os frames para o
+        // evento `Event::Screenshot` chegar e ser salvo (vale para F12 também).
+        if self.pending {
             ctx.request_repaint();
         }
         self.save_ready(ctx)
+    }
+
+    /// Solicita uma captura manualmente (ex.: botão na UI), sem depender do F12.
+    pub(crate) fn capture_now(&mut self, ctx: &egui::Context) {
+        Self::request(ctx);
+        self.pending = true;
     }
 
     fn request(ctx: &egui::Context) {
@@ -89,6 +103,8 @@ impl Capturer {
         });
         let mut auto_done = false;
         for image in images {
+            // O evento chegou: a captura deixa de estar pendente.
+            self.pending = false;
             let dest = self.next_destination();
             match Self::save_png(&image, &dest) {
                 Ok(()) => {
@@ -106,7 +122,8 @@ impl Capturer {
             return path.clone();
         }
         self.counter += 1;
-        PathBuf::from(format!("nur-screenshot-{:03}.png", self.counter))
+        let name = format!("nur-screenshot-{:03}.png", self.counter);
+        std::env::current_dir().map_or_else(|_| PathBuf::from(&name), |dir| dir.join(&name))
     }
 
     fn save_png(image: &egui::ColorImage, dest: &Path) -> Result<(), image::ImageError> {

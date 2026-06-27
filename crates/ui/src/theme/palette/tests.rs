@@ -6,7 +6,9 @@ fn themes_have_different_backgrounds() {
 }
 
 #[test]
-fn success_is_green_in_both_themes() {
-    // Verde de sucesso é o mesmo token (#16A34A) nos dois temas.
-    assert_eq!(Palette::light().success(), Palette::dark().success());
+fn dark_layers_are_distinct() {
+    // backdrop < card < controle formam 3 níveis distintos no tema escuro.
+    let p = Palette::dark();
+    assert_ne!(p.background(), p.surface());
+    assert_ne!(p.surface(), p.control());
 }

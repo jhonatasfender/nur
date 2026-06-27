@@ -19,6 +19,7 @@ fn manual_destination_increments_and_numbers() {
         frames: 0,
         counter: 0,
         last_msg: None,
+        pending: false,
     };
     let p1 = cap.next_destination();
     let p2 = cap.next_destination();
