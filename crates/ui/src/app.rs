@@ -2,9 +2,11 @@
 
 use crate::capture::Capturer;
 use crate::theme::{Fonts, ThemeKit, ThemePreference};
-use application::ports::UiState;
+use application::ports::{ScreenshotWriter, UiState};
+use std::path::PathBuf;
 use std::sync::Arc;
 
+mod demo;
 mod draw;
 mod header;
 mod modal;
@@ -12,6 +14,8 @@ mod options;
 mod status;
 #[cfg(test)]
 mod tests;
+
+pub use demo::DemoScenario;
 
 /// O que o usuário quer fazer com o dispositivo.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,15 +63,15 @@ pub struct NurApp {
 }
 
 impl NurApp {
-    /// Cria o app com o estado injetado (tema padrão: escuro).
+    /// Cria o app com o estado e o gravador de capturas injetados (tema escuro).
     #[must_use]
-    pub fn new(state: Arc<dyn UiState>) -> Self {
-        let mut app = Self {
+    pub fn new(state: Arc<dyn UiState>, screenshots: Arc<dyn ScreenshotWriter>) -> Self {
+        Self {
             state,
             theme: ThemePreference::Dark,
             theme_installed: false,
             fonts_installed: false,
-            capturer: Capturer::new(),
+            capturer: Capturer::new(screenshots, None),
             selected: None,
             mode: Mode::Boot,
             iso_selected: false,
@@ -80,38 +84,6 @@ impl NurApp {
             confirm_text: String::new(),
             phase: Phase::Idle,
             progress: 0.0,
-        };
-        app.seed_demo();
-        app
-    }
-
-    // Estado inicial para captura/validação visual (env `NUR_DEMO`); no-op em produção.
-    fn seed_demo(&mut self) {
-        if std::env::var("NUR_THEME").as_deref() == Ok("light") {
-            self.theme = ThemePreference::Light;
-        }
-        match std::env::var("NUR_DEMO").as_deref() {
-            Ok("ready") => {
-                self.selected = Some(0);
-                self.iso_selected = true;
-            }
-            Ok("modal") => {
-                self.selected = Some(0);
-                self.iso_selected = true;
-                self.modal_open = true;
-                "APAGAR".clone_into(&mut self.confirm_text);
-            }
-            Ok("running") => {
-                self.selected = Some(0);
-                self.iso_selected = true;
-                self.phase = Phase::Working;
-                self.progress = 0.42;
-            }
-            Ok("format") => {
-                self.selected = Some(0);
-                self.mode = Mode::Format;
-            }
-            _ => {}
         }
     }
 
@@ -119,6 +91,13 @@ impl NurApp {
     #[must_use]
     pub fn with_theme(mut self, pref: ThemePreference) -> Self {
         self.theme = pref;
+        self
+    }
+
+    /// Builder: define o destino de captura automática (modo headless).
+    #[must_use]
+    pub fn with_capture_path(mut self, dest: Option<PathBuf>) -> Self {
+        self.capturer.set_auto(dest);
         self
     }
 

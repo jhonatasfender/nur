@@ -22,7 +22,7 @@ fn main() -> std::process::ExitCode {
         }
     };
 
-    match window::open(state) {
+    match window::Window::open(state) {
         Ok(()) => std::process::ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("erro: {e}");
