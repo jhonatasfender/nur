@@ -1,7 +1,7 @@
 //! Seções de imagem ISO e opções de formato.
 
 use super::{Mode, NurApp};
-use crate::components::{FieldLabel, LabeledInput, LabeledSelect};
+use crate::components::{Checkbox, FieldLabel, LabeledInput, LabeledSelect};
 use crate::theme::Palette;
 
 const PARTITIONS: [&str; 2] = ["GPT", "MBR"];
@@ -83,11 +83,6 @@ impl NurApp {
             LabeledInput::show(&mut cols[1], palette, "Rótulo do volume", &mut self.label);
         });
         ui.add_space(12.0);
-        ui.checkbox(
-            &mut self.quick_format,
-            egui::RichText::new("Formatação rápida")
-                .color(palette.text())
-                .size(13.0),
-        );
+        Checkbox::show(ui, palette, "Formatação rápida", &mut self.quick_format);
     }
 }

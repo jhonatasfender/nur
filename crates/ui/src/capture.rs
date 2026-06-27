@@ -80,6 +80,12 @@ impl Capturer {
         self.save_ready(ctx)
     }
 
+    /// Solicita uma captura manualmente (ex.: botão na UI), sem depender do F12.
+    pub(crate) fn capture_now(&mut self, ctx: &egui::Context) {
+        Self::request(ctx);
+        self.pending = true;
+    }
+
     fn request(ctx: &egui::Context) {
         ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
     }

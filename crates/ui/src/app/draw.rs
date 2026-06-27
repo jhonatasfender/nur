@@ -70,6 +70,8 @@ impl NurApp {
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     self.theme_toggle(ui, palette);
+                    ui.add_space(6.0);
+                    self.screenshot_button(ui, palette);
                 });
             })
             .response;
@@ -113,6 +115,19 @@ impl NurApp {
         if ui.add_sized([36.0, 36.0], button).clicked() {
             self.theme = self.theme.toggle();
             self.theme_installed = false;
+        }
+    }
+
+    fn screenshot_button(&mut self, ui: &mut egui::Ui, palette: Palette) {
+        let button = egui::Button::new(egui::RichText::new("\u{1F4F7}").size(14.0))
+            .fill(palette.control())
+            .corner_radius(egui::CornerRadius::same(8));
+        if ui
+            .add_sized([36.0, 36.0], button)
+            .on_hover_text("Capturar tela (ou F12)")
+            .clicked()
+        {
+            self.capturer.capture_now(ui.ctx());
         }
     }
 
