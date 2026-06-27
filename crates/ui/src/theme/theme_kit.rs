@@ -38,9 +38,13 @@ impl ThemeKit {
     /// Aplica os `Visuals` derivados da preferência ao contexto.
     pub fn install(ctx: &egui::Context, pref: ThemePreference) {
         let palette = pref.palette();
-        let mut visuals = match pref {
-            ThemePreference::Light => egui::Visuals::light(),
-            ThemePreference::Dark => egui::Visuals::dark(),
+        let (theme, egui_pref) = match pref {
+            ThemePreference::Light => (egui::Theme::Light, egui::ThemePreference::Light),
+            ThemePreference::Dark => (egui::Theme::Dark, egui::ThemePreference::Dark),
+        };
+        let mut visuals = match theme {
+            egui::Theme::Light => egui::Visuals::light(),
+            egui::Theme::Dark => egui::Visuals::dark(),
         };
         visuals.panel_fill = palette.background();
         visuals.window_fill = palette.surface();
@@ -60,7 +64,15 @@ impl ThemeKit {
             widget.bg_stroke = stroke;
             widget.corner_radius = radius;
         }
-        ctx.set_visuals(visuals);
+        // Trava o tema (sem seguir o sistema, senão o toggle não "pega") e
+        // instala os Visuals no slot do tema correspondente.
+        ctx.set_visuals_of(theme, visuals);
+        ctx.set_theme(egui_pref);
+        // Altura e padding confortáveis para selects/inputs (~px-3 py-2.5).
+        ctx.all_styles_mut(|style| {
+            style.spacing.interact_size.y = 34.0;
+            style.spacing.button_padding = egui::vec2(12.0, 9.0);
+        });
     }
 }
 

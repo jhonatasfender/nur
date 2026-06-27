@@ -53,6 +53,7 @@ impl NurApp {
                 ui.add(
                     egui::TextEdit::singleline(&mut self.confirm_text)
                         .hint_text("APAGAR")
+                        .margin(egui::Margin::symmetric(12, 9))
                         .desired_width(f32::INFINITY),
                 );
                 ui.add_space(14.0);

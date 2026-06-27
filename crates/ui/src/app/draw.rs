@@ -7,36 +7,36 @@ impl NurApp {
     /// Card central (superfície arredondada) com todas as seções.
     pub(super) fn draw_card(&mut self, ui: &mut egui::Ui) {
         let palette = self.theme.palette();
-        let card_w = 432.0_f32.min(ui.available_width() - 16.0);
-        let side = ((ui.available_width() - card_w) / 2.0).max(0.0);
-        ui.add_space(16.0);
-        // Card centrado horizontalmente (margem lateral), conteúdo à esquerda.
-        ui.horizontal(|ui| {
-            ui.add_space(side);
-            ui.vertical(|ui| {
-                ui.set_width(card_w);
-                egui::Frame::NONE
-                    .fill(palette.surface())
-                    .stroke(egui::Stroke::new(1.0, palette.border()))
-                    .corner_radius(egui::CornerRadius::same(16))
-                    .inner_margin(egui::Margin::same(20))
-                    .show(ui, |ui| {
-                        ui.set_width(card_w - 40.0);
-                        self.header(ui, palette);
-                        ui.add_space(18.0);
-                        self.device_selector(ui, palette);
-                        ui.add_space(18.0);
-                        self.mode_selector(ui, palette);
-                        ui.add_space(18.0);
-                        self.iso_section(ui, palette);
-                        self.options_section(ui, palette);
-                        ui.add_space(18.0);
-                        self.status_section(ui, palette);
-                        ui.add_space(18.0);
-                        self.footer(ui, palette);
-                    });
+        // A janela é o próprio card: pinta um retângulo arredondado cobrindo a
+        // viewport. Como a janela é transparente, os cantos ficam redondos.
+        let rect = ui.ctx().viewport_rect();
+        let radius = egui::CornerRadius::same(16);
+        let painter = ui.painter().clone();
+        painter.rect_filled(rect, radius, palette.surface());
+        painter.rect_stroke(
+            rect.shrink(0.5),
+            radius,
+            egui::Stroke::new(1.0, palette.border()),
+            egui::StrokeKind::Inside,
+        );
+        // Conteúdo com padding interno (o card ocupa a janela inteira).
+        egui::Frame::NONE
+            .inner_margin(egui::Margin::same(20))
+            .show(ui, |ui| {
+                ui.set_min_width(ui.available_width());
+                self.header(ui, palette);
+                ui.add_space(18.0);
+                self.device_selector(ui, palette);
+                ui.add_space(18.0);
+                self.mode_selector(ui, palette);
+                ui.add_space(18.0);
+                self.iso_section(ui, palette);
+                self.options_section(ui, palette);
+                ui.add_space(18.0);
+                self.status_section(ui, palette);
+                ui.add_space(18.0);
+                self.footer(ui, palette);
             });
-        });
     }
 
     fn header(&mut self, ui: &mut egui::Ui, palette: Palette) {
@@ -62,9 +62,14 @@ impl NurApp {
                 });
             })
             .response;
-        // Sem decoração nativa: arrastar a janela pelo header.
+        // Arrastar a janela pelo header — exceto sobre o botão de tema (direita),
+        // senão o arraste rouba o clique e o toggle claro/escuro não funciona.
+        let drag_rect = egui::Rect::from_min_max(
+            resp.rect.min,
+            egui::pos2(resp.rect.max.x - 52.0, resp.rect.max.y),
+        );
         if ui
-            .interact(resp.rect, egui::Id::new("titlebar"), egui::Sense::drag())
+            .interact(drag_rect, egui::Id::new("titlebar"), egui::Sense::drag())
             .drag_started()
         {
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);

@@ -156,9 +156,10 @@ impl NurApp {
 }
 
 impl eframe::App for NurApp {
-    /// Cor de fundo da janela = backdrop do tema.
+    /// Janela transparente: o card arredondado é pintado em `ui`; fora dele
+    /// fica transparente, dando à janela cantos redondos.
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
-        self.theme.palette().background().to_normalized_gamma_f32()
+        [0.0, 0.0, 0.0, 0.0]
     }
 
     /// Instala fonte/tema, trata captura e avança o progresso.

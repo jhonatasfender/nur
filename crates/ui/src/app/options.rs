@@ -85,7 +85,11 @@ impl NurApp {
                     .size(11.0),
             );
             cols[1].add_space(3.0);
-            cols[1].add(egui::TextEdit::singleline(&mut self.label).desired_width(f32::INFINITY));
+            cols[1].add(
+                egui::TextEdit::singleline(&mut self.label)
+                    .margin(egui::Margin::symmetric(12, 9))
+                    .desired_width(f32::INFINITY),
+            );
         });
         ui.add_space(12.0);
         ui.checkbox(
