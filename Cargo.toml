@@ -23,6 +23,8 @@ eframe = { version = "0.35", default-features = false, features = ["default_font
 serde = { version = "1", features = ["derive"] }
 image = { version = "0.25", default-features = false, features = ["png"] }
 async-trait = "0.1"
+zbus = "5"
+rfd = "0.15"
 
 [workspace.lints.clippy]
 # Piso obrigatório e camada pedante (nursery deliberadamente OFF), espelhando o solana.

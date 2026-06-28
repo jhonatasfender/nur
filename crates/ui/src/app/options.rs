@@ -3,6 +3,7 @@
 use super::{Mode, NurApp};
 use crate::components::{Checkbox, FieldLabel, LabeledInput, LabeledSelect};
 use crate::theme::Palette;
+use domain::IsoKind;
 
 const PARTITIONS: [&str; 2] = ["GPT", "MBR"];
 const TARGETS: [&str; 3] = ["UEFI", "BIOS", "BIOS ou UEFI"];
@@ -14,10 +15,10 @@ impl NurApp {
             return;
         }
         FieldLabel::show(ui, palette, "IMAGEM ISO");
-        let main = if self.iso_selected {
-            "ubuntu-24.04-desktop-amd64.iso \u{00B7} 5,8 GB"
-        } else {
-            "Arraste a ISO aqui ou selecione um arquivo"
+        let selection = self.state.selected_iso();
+        let main = match &selection {
+            Some(sel) => format!("{} \u{00B7} {}", sel.name(), sel.size().humanize()),
+            None => "Clique para selecionar um arquivo".to_owned(),
         };
         let area = egui::Frame::NONE
             .fill(palette.control())
@@ -45,7 +46,18 @@ impl NurApp {
             ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
         }
         if zone.clicked() {
-            self.iso_selected = true;
+            self.commands.pick_iso();
+        }
+        if selection.is_some_and(|s| s.kind() == IsoKind::Unsupported) {
+            ui.add_space(6.0);
+            ui.label(
+                egui::RichText::new(
+                    "\u{26A0} ISO não-isohybrid \u{2014} gravação raw indisponível; \
+                     ISOs Windows precisam do modo extração, ainda não disponível.",
+                )
+                .color(palette.destructive())
+                .size(12.0),
+            );
         }
         ui.add_space(18.0);
     }

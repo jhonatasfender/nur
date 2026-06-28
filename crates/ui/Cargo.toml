@@ -7,6 +7,7 @@ license.workspace = true
 
 [dependencies]
 application = { path = "../application" }
+domain = { path = "../domain" }
 egui.workspace = true
 eframe.workspace = true
 serde = { workspace = true }

@@ -1,8 +1,9 @@
 //! Modal de confirmação ("digite APAGAR") e início da operação.
 
-use super::{NurApp, Phase};
+use super::NurApp;
 use crate::components::{DangerButton, SecondaryButton};
 use crate::theme::Palette;
+use domain::DevicePath;
 
 impl NurApp {
     pub(super) fn open_confirm(&mut self) {
@@ -78,8 +79,9 @@ impl NurApp {
         }
         if confirm {
             self.modal_open = false;
-            self.phase = Phase::Preparing;
-            self.progress = 0.0;
+            if !device_path.is_empty() {
+                self.commands.start(DevicePath::new(device_path));
+            }
         }
     }
 

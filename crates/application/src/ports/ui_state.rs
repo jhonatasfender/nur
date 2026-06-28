@@ -42,6 +42,21 @@ pub enum DeviceListState {
 pub trait UiState: Send + Sync {
     /// Estado atual da lista de dispositivos.
     fn device_list(&self) -> DeviceListState;
+
+    /// Estado atual da gravação (padrão: ociosa).
+    fn write_state(&self) -> crate::ports::WriteState {
+        crate::ports::WriteState::Idle
+    }
+
+    /// ISO selecionada pelo usuário, se houver (padrão: nenhuma).
+    fn selected_iso(&self) -> Option<crate::ports::IsoSelection> {
+        None
+    }
+
+    /// Mensagem discreta de falha ao abrir o pendrive (padrão: nenhuma).
+    fn browse_notice(&self) -> Option<String> {
+        None
+    }
 }
 
 #[cfg(test)]

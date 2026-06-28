@@ -1,5 +1,6 @@
 //! Composition root do Nur: monta os adapters e abre a janela.
 
+mod commands;
 mod window;
 
 fn main() -> std::process::ExitCode {
