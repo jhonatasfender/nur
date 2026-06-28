@@ -6,6 +6,7 @@ mod raw_copier;
 mod sysfs_disk_service;
 mod udisks2_block_writer;
 mod udisks2_device_browser;
+mod udisks2_formatter;
 
 pub use iso_file_inspector::IsoFileInspector;
 pub use mount_table::MountTable;
@@ -13,3 +14,4 @@ pub use raw_copier::RawCopier;
 pub use sysfs_disk_service::SysfsDiskService;
 pub use udisks2_block_writer::Udisks2BlockWriter;
 pub use udisks2_device_browser::Udisks2DeviceBrowser;
+pub use udisks2_formatter::Udisks2Formatter;
