@@ -19,6 +19,17 @@ fn iso_error_wraps_message() {
 }
 
 #[test]
+fn format_error_messages_are_in_ptbr() {
+    use super::FormatError;
+    assert_eq!(FormatError::Unauthorized.to_string(), "autorização negada");
+    assert_eq!(FormatError::DeviceBusy.to_string(), "dispositivo ocupado");
+    assert_eq!(
+        FormatError::ToolMissing("exFAT".to_owned()).to_string(),
+        "instale as ferramentas para formatar em exFAT"
+    );
+}
+
+#[test]
 fn browse_error_messages_are_in_ptbr() {
     use super::BrowseError;
     assert_eq!(
