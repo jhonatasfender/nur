@@ -83,6 +83,12 @@ infrastructure::Udisks2DiskService (zbus + udisks2)
 - [ ] Nada é gravado nem formatado; operação 100% read-only.
 - [ ] Qualidade mantida: clippy `-D warnings`, testes, `unsafe_code=forbid` (zbus é Rust seguro), zero campos `pub`, ≤199 linhas/arquivo, código em inglês.
 
+## 6.1 Nota de implementação — pivot de udisks2 para sysfs
+
+Durante a implementação, o **udisks2 (zbus) mostrou-se lento para enumeração**: cada chamada D-Bus levava ~1s nesta máquina (com `busctl` rápido, o gargalo é o volume de chamadas da pilha zbus/udisks2 — `get_managed_objects` + propriedades por drive + `block_for_drive`), resultando em ~7s por listagem — UX ruim. Tentativas (cache do client, feature `tokio` do zbus, `async-io` nativo via `spawn_blocking`) não resolveram.
+
+**Decisão:** a enumeração passa a ler o **`/sys/block`** diretamente (`SysfsDiskService`) — leituras de arquivo locais, rápidas, sem D-Bus; filtra dispositivos **USB** (caminho canônico contém `/usb`). A **porta async + ponte tokio→egui permanecem** (o adapter roda o read sync via `spawn_blocking`). O **udisks2 fica para o incremento de gravação**, onde é necessário pelo **polkit** (`Block.OpenDevice`) e opera sobre **um único device** (poucas chamadas). Isso ajusta o ADR 0004 para: *udisks2 na gravação; sysfs na enumeração*.
+
 ## 7. Fora de escopo
 
 - Gravação raw / formatação (próximo incremento, com o spike do ADR 0006).
