@@ -19,6 +19,7 @@ impl UiCommands for CommandsFake {
     fn pick_iso(&self) {}
     fn start(&self, _device: DevicePath) {}
     fn cancel(&self) {}
+    fn open_device(&self, _device: DevicePath) {}
 }
 
 struct NoopWriter;

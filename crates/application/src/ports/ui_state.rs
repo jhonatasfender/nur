@@ -52,6 +52,11 @@ pub trait UiState: Send + Sync {
     fn selected_iso(&self) -> Option<crate::ports::IsoSelection> {
         None
     }
+
+    /// Mensagem discreta de falha ao abrir o pendrive (padrão: nenhuma).
+    fn browse_notice(&self) -> Option<String> {
+        None
+    }
 }
 
 #[cfg(test)]

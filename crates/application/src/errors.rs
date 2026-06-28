@@ -50,5 +50,19 @@ pub enum WriteError {
     Cancelled,
 }
 
+/// Falhas ao abrir o pendrive no gerenciador de arquivos.
+#[derive(Debug, thiserror::Error)]
+pub enum BrowseError {
+    /// O dispositivo não tem uma partição com filesystem montável.
+    #[error("este pendrive não tem uma partição legível para abrir")]
+    NoFilesystem,
+    /// Falha ao montar a partição.
+    #[error("não foi possível montar o pendrive: {0}")]
+    Mount(String),
+    /// Falha ao lançar o gerenciador de arquivos.
+    #[error("não foi possível abrir o gerenciador: {0}")]
+    Launch(String),
+}
+
 #[cfg(test)]
 mod tests;

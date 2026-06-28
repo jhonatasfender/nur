@@ -17,3 +17,20 @@ fn iso_error_wraps_message() {
         "falha ao ler a ISO: x"
     );
 }
+
+#[test]
+fn browse_error_messages_are_in_ptbr() {
+    use super::BrowseError;
+    assert_eq!(
+        BrowseError::NoFilesystem.to_string(),
+        "este pendrive não tem uma partição legível para abrir"
+    );
+    assert_eq!(
+        BrowseError::Mount("x".to_owned()).to_string(),
+        "não foi possível montar o pendrive: x"
+    );
+    assert_eq!(
+        BrowseError::Launch("y".to_owned()).to_string(),
+        "não foi possível abrir o gerenciador: y"
+    );
+}

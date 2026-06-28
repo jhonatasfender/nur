@@ -12,4 +12,7 @@ pub trait UiCommands: Send + Sync {
 
     /// Solicita o cancelamento da gravação em andamento.
     fn cancel(&self);
+
+    /// Abre o pendrive no gerenciador de arquivos do SO.
+    fn open_device(&self, device: DevicePath);
 }

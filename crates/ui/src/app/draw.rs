@@ -89,13 +89,37 @@ impl NurApp {
                     ui.selectable_value(&mut self.selected, Some(i), device.description());
                 }
             });
-        if self.selected.is_some() {
+        if let Some(device) = self.selected.and_then(|i| devices.get(i)) {
+            let path = device.path().to_owned();
             ui.add_space(6.0);
             ui.label(
                 egui::RichText::new("\u{26A0} Todos os dados deste dispositivo serão apagados.")
                     .color(palette.destructive())
                     .size(12.0),
             );
+            ui.add_space(4.0);
+            let link = ui.add(
+                egui::Label::new(
+                    egui::RichText::new("\u{1F4C2} Abrir para conferir o conteúdo")
+                        .color(palette.accent())
+                        .size(12.0),
+                )
+                .sense(egui::Sense::click()),
+            );
+            if link.hovered() {
+                ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+            }
+            if link.clicked() {
+                self.commands.open_device(domain::DevicePath::new(path));
+            }
+            if let Some(msg) = self.state.browse_notice() {
+                ui.add_space(2.0);
+                ui.label(
+                    egui::RichText::new(msg)
+                        .color(palette.destructive())
+                        .size(11.0),
+                );
+            }
         }
     }
 
