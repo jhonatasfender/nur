@@ -10,14 +10,14 @@ use std::time::Duration;
 use ui::theme::ThemePreference;
 use ui::{DemoScenario, NurApp};
 
-/// Estado da UI alimentado por uma task de polling do udisks2 em background.
+/// Estado da UI alimentado por uma task de polling do sysfs em background.
 pub(crate) struct LiveUiState {
     shared: Arc<RwLock<DeviceListState>>,
 }
 
 impl LiveUiState {
-    /// Cria o estado (inicia em `Loading`) e spawna a task que faz polling do
-    /// udisks2 a cada 1,5s, atualizando o estado e repintando a UI.
+    /// Cria o estado (inicia em `Loading`) e spawna a task que enumera os
+    /// pendrives a cada 1,5s, atualizando o estado e repintando a UI.
     pub(crate) fn spawn(runtime: &tokio::runtime::Handle, ctx: eframe::egui::Context) -> Self {
         let shared = Arc::new(RwLock::new(DeviceListState::Loading));
         let writer = Arc::clone(&shared);

@@ -60,10 +60,11 @@ impl SysfsDiskService {
             std::fs::read_dir("/sys/block").map_err(|e| DiskError::Unavailable(e.to_string()))?;
         let mut devices = Vec::new();
         for entry in entries.flatten() {
-            if let Some(name) = entry.file_name().to_str() {
-                if let Some(device) = Self::read_device(name) {
-                    devices.push(device);
-                }
+            let file_name = entry.file_name();
+            if let Some(name) = file_name.to_str()
+                && let Some(device) = Self::read_device(name)
+            {
+                devices.push(device);
             }
         }
         Ok(devices)
