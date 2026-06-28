@@ -11,9 +11,6 @@ pub trait DeviceFormatter: Send + Sync {
     ///
     /// # Errors
     /// Retorna [`FormatError`] em falha de autorização, ferramenta ausente ou backend.
-    async fn format(
-        &self,
-        device: &DevicePath,
-        options: &FormatOptions,
-    ) -> Result<(), FormatError>;
+    async fn format(&self, device: &DevicePath, options: &FormatOptions)
+    -> Result<(), FormatError>;
 }
