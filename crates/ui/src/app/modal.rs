@@ -80,8 +80,45 @@ impl NurApp {
         if confirm {
             self.modal_open = false;
             if !device_path.is_empty() {
-                self.commands.start(DevicePath::new(device_path));
+                self.dispatch(DevicePath::new(device_path));
             }
+        }
+    }
+
+    // Dispara a operação do modo atual (gravar ou formatar).
+    fn dispatch(&self, device: DevicePath) {
+        match self.mode {
+            super::Mode::Boot => self.commands.start(device),
+            super::Mode::Format => {
+                if let Ok(label) = domain::VolumeLabel::parse(&self.label) {
+                    let options = application::ports::FormatOptions::new(
+                        self.partition_scheme(),
+                        self.filesystem_kind(),
+                        label,
+                        self.quick_format,
+                    );
+                    self.commands.format(device, options);
+                }
+            }
+        }
+    }
+
+    // Índice do seletor de partição → value object de domínio.
+    fn partition_scheme(&self) -> domain::PartitionScheme {
+        if self.partition == 0 {
+            domain::PartitionScheme::Gpt
+        } else {
+            domain::PartitionScheme::Mbr
+        }
+    }
+
+    // Índice do seletor de filesystem → value object de domínio.
+    fn filesystem_kind(&self) -> domain::FilesystemKind {
+        match self.filesystem {
+            0 => domain::FilesystemKind::Fat32,
+            1 => domain::FilesystemKind::Ntfs,
+            2 => domain::FilesystemKind::ExFat,
+            _ => domain::FilesystemKind::Ext4,
         }
     }
 

@@ -20,6 +20,7 @@ impl UiCommands for CommandsFake {
     fn start(&self, _device: DevicePath) {}
     fn cancel(&self) {}
     fn open_device(&self, _device: DevicePath) {}
+    fn format(&self, _device: DevicePath, _options: application::ports::FormatOptions) {}
 }
 
 struct NoopWriter;

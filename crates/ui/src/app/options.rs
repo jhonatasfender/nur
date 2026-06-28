@@ -64,36 +64,61 @@ impl NurApp {
 
     pub(super) fn options_section(&mut self, ui: &mut egui::Ui, palette: Palette) {
         FieldLabel::show(ui, palette, "OPÇÕES DE FORMATO");
-        ui.columns(2, |cols| {
-            LabeledSelect::show(
-                &mut cols[0],
-                palette,
-                "partition",
-                "Esquema de partição",
-                &PARTITIONS,
-                &mut self.partition,
-            );
-            LabeledSelect::show(
-                &mut cols[1],
-                palette,
-                "target",
-                "Sistema alvo",
-                &TARGETS,
-                &mut self.target,
-            );
-        });
-        ui.add_space(12.0);
-        ui.columns(2, |cols| {
-            LabeledSelect::show(
-                &mut cols[0],
-                palette,
-                "fs",
-                "Sistema de arquivos",
-                &FILESYSTEMS,
-                &mut self.filesystem,
-            );
-            LabeledInput::show(&mut cols[1], palette, "Rótulo do volume", &mut self.label);
-        });
+        if self.mode == Mode::Boot {
+            // No modo Boot, "Sistema alvo" (UEFI/BIOS) faz sentido.
+            ui.columns(2, |cols| {
+                LabeledSelect::show(
+                    &mut cols[0],
+                    palette,
+                    "partition",
+                    "Esquema de partição",
+                    &PARTITIONS,
+                    &mut self.partition,
+                );
+                LabeledSelect::show(
+                    &mut cols[1],
+                    palette,
+                    "target",
+                    "Sistema alvo",
+                    &TARGETS,
+                    &mut self.target,
+                );
+            });
+            ui.add_space(12.0);
+            ui.columns(2, |cols| {
+                LabeledSelect::show(
+                    &mut cols[0],
+                    palette,
+                    "fs",
+                    "Sistema de arquivos",
+                    &FILESYSTEMS,
+                    &mut self.filesystem,
+                );
+                LabeledInput::show(&mut cols[1], palette, "Rótulo do volume", &mut self.label);
+            });
+        } else {
+            // No modo Formatar, "Sistema alvo" é conceito de boot — ocultado.
+            ui.columns(2, |cols| {
+                LabeledSelect::show(
+                    &mut cols[0],
+                    palette,
+                    "partition",
+                    "Esquema de partição",
+                    &PARTITIONS,
+                    &mut self.partition,
+                );
+                LabeledSelect::show(
+                    &mut cols[1],
+                    palette,
+                    "fs",
+                    "Sistema de arquivos",
+                    &FILESYSTEMS,
+                    &mut self.filesystem,
+                );
+            });
+            ui.add_space(12.0);
+            LabeledInput::show(ui, palette, "Rótulo do volume", &mut self.label);
+        }
         ui.add_space(12.0);
         Checkbox::show(ui, palette, "Formatação rápida", &mut self.quick_format);
     }

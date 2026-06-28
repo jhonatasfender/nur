@@ -5,12 +5,14 @@
 
 use application::errors::WriteError;
 use application::ports::{
-    CancelFlag, DeviceBrowser, IsoInspector, IsoSelection, ProgressSink, UiCommands, WritePhase,
-    WriteProgress, WriteRequest, WriteState,
+    CancelFlag, DeviceBrowser, FormatOptions, IsoInspector, IsoSelection, ProgressSink, UiCommands,
+    WritePhase, WriteProgress, WriteRequest, WriteState,
 };
-use application::use_cases::CreateBootable;
+use application::use_cases::{CreateBootable, FormatDevice};
 use domain::{ByteSize, DevicePath, IsoKind};
-use infrastructure::linux::{IsoFileInspector, Udisks2BlockWriter, Udisks2DeviceBrowser};
+use infrastructure::linux::{
+    IsoFileInspector, Udisks2BlockWriter, Udisks2DeviceBrowser, Udisks2Formatter,
+};
 use infrastructure::picker::RfdIsoPicker;
 use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
@@ -121,6 +123,24 @@ impl UiCommands for AppCommands {
             let result = Udisks2DeviceBrowser::new().open(&device).await;
             if let Ok(mut guard) = notice.write() {
                 *guard = result.err().map(|e| e.to_string());
+            }
+            ctx.request_repaint();
+        });
+    }
+
+    fn format(&self, device: DevicePath, options: FormatOptions) {
+        let ctx = self.ctx.clone();
+        let write = Arc::clone(&self.write);
+        self.runtime.spawn(async move {
+            let uc = FormatDevice::new(Arc::new(Udisks2Formatter::new()));
+            let sink: Arc<dyn ProgressSink> =
+                Arc::new(AppProgressSink::new(Arc::clone(&write), ctx.clone()));
+            let next = match uc.execute(device, options, sink).await {
+                Ok(()) => WriteState::Done,
+                Err(e) => WriteState::Failed(e.to_string()),
+            };
+            if let Ok(mut guard) = write.write() {
+                *guard = next;
             }
             ctx.request_repaint();
         });
