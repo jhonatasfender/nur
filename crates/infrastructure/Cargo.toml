@@ -11,6 +11,7 @@ application = { path = "../application" }
 image = { workspace = true }
 async-trait = { workspace = true }
 tokio = { workspace = true }
+zbus = { workspace = true }
 
 [lints]
 workspace = true

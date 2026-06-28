@@ -3,7 +3,9 @@
 mod iso_file_inspector;
 mod raw_copier;
 mod sysfs_disk_service;
+mod udisks2_block_writer;
 
 pub use iso_file_inspector::IsoFileInspector;
 pub use raw_copier::RawCopier;
 pub use sysfs_disk_service::SysfsDiskService;
+pub use udisks2_block_writer::Udisks2BlockWriter;
