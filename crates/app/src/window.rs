@@ -16,6 +16,7 @@ pub(crate) struct LiveUiState {
     devices: Arc<RwLock<DeviceListState>>,
     write: Arc<RwLock<WriteState>>,
     iso: Arc<RwLock<Option<IsoSelection>>>,
+    notice: Arc<RwLock<Option<String>>>,
 }
 
 impl LiveUiState {
@@ -24,11 +25,13 @@ impl LiveUiState {
         devices: Arc<RwLock<DeviceListState>>,
         write: Arc<RwLock<WriteState>>,
         iso: Arc<RwLock<Option<IsoSelection>>>,
+        notice: Arc<RwLock<Option<String>>>,
     ) -> Self {
         Self {
             devices,
             write,
             iso,
+            notice,
         }
     }
 
@@ -73,6 +76,10 @@ impl UiState for LiveUiState {
     fn selected_iso(&self) -> Option<IsoSelection> {
         self.iso.read().ok().and_then(|guard| guard.clone())
     }
+
+    fn browse_notice(&self) -> Option<String> {
+        self.notice.read().ok().and_then(|guard| guard.clone())
+    }
 }
 
 /// Bootstrap da janela do Nur: monta o app (com adapters/config) e abre o eframe.
@@ -103,13 +110,15 @@ impl Window {
                 let devices = Arc::new(RwLock::new(DeviceListState::Loading));
                 let write = Arc::new(RwLock::new(WriteState::Idle));
                 let iso = Arc::new(RwLock::new(None));
+                let notice = Arc::new(RwLock::new(None));
                 LiveUiState::spawn_polling(&runtime, ctx.clone(), Arc::clone(&devices));
                 let state = Arc::new(LiveUiState::new(
                     devices,
                     Arc::clone(&write),
                     Arc::clone(&iso),
+                    Arc::clone(&notice),
                 ));
-                let commands = Arc::new(AppCommands::new(runtime.clone(), ctx, write, iso));
+                let commands = Arc::new(AppCommands::new(runtime.clone(), ctx, write, iso, notice));
                 Ok(Box::new(Self::build_app(state, commands)))
             }),
         )

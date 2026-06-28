@@ -5,12 +5,12 @@
 
 use application::errors::WriteError;
 use application::ports::{
-    CancelFlag, IsoInspector, IsoSelection, ProgressSink, UiCommands, WritePhase, WriteProgress,
-    WriteRequest, WriteState,
+    CancelFlag, DeviceBrowser, IsoInspector, IsoSelection, ProgressSink, UiCommands, WritePhase,
+    WriteProgress, WriteRequest, WriteState,
 };
 use application::use_cases::CreateBootable;
 use domain::{ByteSize, DevicePath, IsoKind};
-use infrastructure::linux::{IsoFileInspector, Udisks2BlockWriter};
+use infrastructure::linux::{IsoFileInspector, Udisks2BlockWriter, Udisks2DeviceBrowser};
 use infrastructure::picker::RfdIsoPicker;
 use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
@@ -23,6 +23,7 @@ pub(crate) struct AppCommands {
     iso: Arc<RwLock<Option<IsoSelection>>>,
     iso_path: Arc<RwLock<Option<PathBuf>>>,
     cancel: Arc<RwLock<CancelFlag>>,
+    notice: Arc<RwLock<Option<String>>>,
 }
 
 impl AppCommands {
@@ -32,6 +33,7 @@ impl AppCommands {
         ctx: eframe::egui::Context,
         write: Arc<RwLock<WriteState>>,
         iso: Arc<RwLock<Option<IsoSelection>>>,
+        notice: Arc<RwLock<Option<String>>>,
     ) -> Self {
         Self {
             runtime,
@@ -40,6 +42,7 @@ impl AppCommands {
             iso,
             iso_path: Arc::new(RwLock::new(None)),
             cancel: Arc::new(RwLock::new(CancelFlag::new())),
+            notice,
         }
     }
 }
@@ -109,6 +112,18 @@ impl UiCommands for AppCommands {
         if let Ok(guard) = self.cancel.read() {
             guard.cancel();
         }
+    }
+
+    fn open_device(&self, device: DevicePath) {
+        let ctx = self.ctx.clone();
+        let notice = Arc::clone(&self.notice);
+        self.runtime.spawn(async move {
+            let result = Udisks2DeviceBrowser::new().open(&device).await;
+            if let Ok(mut guard) = notice.write() {
+                *guard = result.err().map(|e| e.to_string());
+            }
+            ctx.request_repaint();
+        });
     }
 }
 
