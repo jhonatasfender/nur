@@ -11,6 +11,7 @@ name = "nur"
 path = "src/main.rs"
 
 [dependencies]
+domain = { path = "../domain" }
 application = { path = "../application" }
 infrastructure = { path = "../infrastructure" }
 ui = { path = "../ui" }

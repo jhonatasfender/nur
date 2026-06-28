@@ -1,6 +1,7 @@
 //! Adapter de estado da UI e bootstrap da janela eframe.
 
-use application::ports::{DeviceListState, UiState};
+use crate::commands::AppCommands;
+use application::ports::{DeviceListState, IsoSelection, UiCommands, UiState, WriteState};
 use application::use_cases::ListDevices;
 use infrastructure::linux::SysfsDiskService;
 use infrastructure::screenshot::PngScreenshotWriter;
@@ -10,17 +11,33 @@ use std::time::Duration;
 use ui::theme::ThemePreference;
 use ui::{DemoScenario, NurApp};
 
-/// Estado da UI alimentado por uma task de polling do sysfs em background.
+/// Estado da UI alimentado pela task de polling do sysfs e pela gravação.
 pub(crate) struct LiveUiState {
-    shared: Arc<RwLock<DeviceListState>>,
+    devices: Arc<RwLock<DeviceListState>>,
+    write: Arc<RwLock<WriteState>>,
+    iso: Arc<RwLock<Option<IsoSelection>>>,
 }
 
 impl LiveUiState {
-    /// Cria o estado (inicia em `Loading`) e spawna a task que enumera os
-    /// pendrives a cada 1,5s, atualizando o estado e repintando a UI.
-    pub(crate) fn spawn(runtime: &tokio::runtime::Handle, ctx: eframe::egui::Context) -> Self {
-        let shared = Arc::new(RwLock::new(DeviceListState::Loading));
-        let writer = Arc::clone(&shared);
+    /// Cria o estado a partir dos locks compartilhados com os comandos.
+    pub(crate) fn new(
+        devices: Arc<RwLock<DeviceListState>>,
+        write: Arc<RwLock<WriteState>>,
+        iso: Arc<RwLock<Option<IsoSelection>>>,
+    ) -> Self {
+        Self {
+            devices,
+            write,
+            iso,
+        }
+    }
+
+    /// Spawna a task que enumera os pendrives a cada 1,5s e repinta a UI.
+    pub(crate) fn spawn_polling(
+        runtime: &tokio::runtime::Handle,
+        ctx: eframe::egui::Context,
+        devices: Arc<RwLock<DeviceListState>>,
+    ) {
         runtime.spawn(async move {
             let uc = ListDevices::new(Arc::new(SysfsDiskService::new()));
             loop {
@@ -30,22 +47,31 @@ impl LiveUiState {
                         DeviceListState::Error(format!("falha ao detectar dispositivos: {e}"))
                     }
                 };
-                if let Ok(mut guard) = writer.write() {
+                if let Ok(mut guard) = devices.write() {
                     *guard = next;
                 }
                 ctx.request_repaint();
                 tokio::time::sleep(Duration::from_secs_f32(1.5)).await;
             }
         });
-        Self { shared }
     }
 }
 
 impl UiState for LiveUiState {
     fn device_list(&self) -> DeviceListState {
-        self.shared
+        self.devices
             .read()
             .map_or(DeviceListState::Loading, |guard| guard.clone())
+    }
+
+    fn write_state(&self) -> WriteState {
+        self.write
+            .read()
+            .map_or(WriteState::Idle, |guard| guard.clone())
+    }
+
+    fn selected_iso(&self) -> Option<IsoSelection> {
+        self.iso.read().ok().and_then(|guard| guard.clone())
     }
 }
 
@@ -73,17 +99,27 @@ impl Window {
             options,
             Box::new(move |cc| {
                 // A ponte tokio→egui nasce aqui (precisa do egui_ctx).
-                let state = LiveUiState::spawn(&runtime, cc.egui_ctx.clone());
-                Ok(Box::new(Self::build_app(Arc::new(state))))
+                let ctx = cc.egui_ctx.clone();
+                let devices = Arc::new(RwLock::new(DeviceListState::Loading));
+                let write = Arc::new(RwLock::new(WriteState::Idle));
+                let iso = Arc::new(RwLock::new(None));
+                LiveUiState::spawn_polling(&runtime, ctx.clone(), Arc::clone(&devices));
+                let state = Arc::new(LiveUiState::new(
+                    devices,
+                    Arc::clone(&write),
+                    Arc::clone(&iso),
+                ));
+                let commands = Arc::new(AppCommands::new(runtime.clone(), ctx, write, iso));
+                Ok(Box::new(Self::build_app(state, commands)))
             }),
         )
         .map_err(|e| anyhow::anyhow!("falha ao iniciar a janela: {e}"))
     }
 
-    // Monta o app injetando o gravador real e a config lida do ambiente.
-    fn build_app(state: Arc<dyn UiState>) -> NurApp {
+    // Monta o app injetando estado, comandos e a config lida do ambiente.
+    fn build_app(state: Arc<dyn UiState>, commands: Arc<dyn UiCommands>) -> NurApp {
         let screenshots = Arc::new(PngScreenshotWriter::new());
-        NurApp::new(state, screenshots)
+        NurApp::new(state, commands, screenshots)
             .with_theme(Self::theme_from_env())
             .with_capture_path(Self::capture_path_from_env())
             .with_demo(Self::demo_from_env())
