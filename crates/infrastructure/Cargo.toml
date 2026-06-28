@@ -12,6 +12,7 @@ image = { workspace = true }
 async-trait = { workspace = true }
 tokio = { workspace = true }
 zbus = { workspace = true }
+rfd = { workspace = true }
 
 [lints]
 workspace = true
