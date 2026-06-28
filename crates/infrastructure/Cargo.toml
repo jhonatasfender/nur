@@ -9,6 +9,8 @@ license.workspace = true
 domain = { path = "../domain" }
 application = { path = "../application" }
 image = { workspace = true }
+async-trait = { workspace = true }
+tokio = { workspace = true }
 
 [lints]
 workspace = true

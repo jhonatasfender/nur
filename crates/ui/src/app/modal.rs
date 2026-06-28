@@ -18,10 +18,13 @@ impl NurApp {
         let screen = ui.ctx().viewport_rect();
         ui.painter()
             .rect_filled(screen, 0.0, egui::Color32::from_black_alpha(150));
-        let device_path = self
-            .selected
-            .and_then(|i| self.state.devices().get(i).map(|d| d.path().to_owned()))
-            .unwrap_or_default();
+        let device_path = match self.state.device_list() {
+            application::ports::DeviceListState::Ready(devices) => self
+                .selected
+                .and_then(|i| devices.get(i).map(|d| d.path().to_owned()))
+                .unwrap_or_default(),
+            _ => String::new(),
+        };
         let (mut cancel, mut confirm) = (false, false);
         egui::Window::new("confirm")
             .title_bar(false)

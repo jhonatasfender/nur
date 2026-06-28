@@ -27,8 +27,22 @@ impl DeviceView {
     }
 }
 
+/// Estado da lista de dispositivos exibido pela UI.
+#[derive(Debug, Clone)]
+pub enum DeviceListState {
+    /// Detecção em andamento.
+    Loading,
+    /// Lista pronta (pode estar vazia).
+    Ready(Vec<DeviceView>),
+    /// Falha ao detectar (mensagem para o usuário).
+    Error(String),
+}
+
 /// Estado lido pela UI a cada frame.
 pub trait UiState: Send + Sync {
-    /// Lista de dispositivos para popular o seletor.
-    fn devices(&self) -> Vec<DeviceView>;
+    /// Estado atual da lista de dispositivos.
+    fn device_list(&self) -> DeviceListState;
 }
+
+#[cfg(test)]
+mod tests;

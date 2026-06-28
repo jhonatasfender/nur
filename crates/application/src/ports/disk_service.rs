@@ -4,10 +4,11 @@ use crate::errors::DiskError;
 use domain::Device;
 
 /// Serviço de disco: enumera dispositivos e (futuramente) grava/formata.
+#[async_trait::async_trait]
 pub trait DiskService: Send + Sync {
-    /// Lista os dispositivos removíveis disponíveis.
+    /// Lista os dispositivos removíveis/USB disponíveis.
     ///
     /// # Errors
     /// Retorna [`DiskError`] se o backend falhar.
-    fn list_devices(&self) -> Result<Vec<Device>, DiskError>;
+    async fn list_devices(&self) -> Result<Vec<Device>, DiskError>;
 }

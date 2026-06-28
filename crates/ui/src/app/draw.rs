@@ -52,9 +52,33 @@ impl NurApp {
 
     fn device_selector(&mut self, ui: &mut egui::Ui, palette: Palette) {
         FieldLabel::show(ui, palette, "DISPOSITIVO");
-        let devices = self.state.devices();
+        let devices = match self.state.device_list() {
+            application::ports::DeviceListState::Loading => {
+                ui.label(
+                    egui::RichText::new("Detectando…")
+                        .color(palette.muted())
+                        .size(13.0),
+                );
+                return;
+            }
+            application::ports::DeviceListState::Error(msg) => {
+                ui.label(
+                    egui::RichText::new(msg)
+                        .color(palette.destructive())
+                        .size(13.0),
+                );
+                return;
+            }
+            application::ports::DeviceListState::Ready(d) => d,
+        };
         let selected_text = self.selected.and_then(|i| devices.get(i)).map_or_else(
-            || "— Selecione o pendrive —".to_owned(),
+            || {
+                if devices.is_empty() {
+                    "Nenhum pendrive detectado".to_owned()
+                } else {
+                    "— Selecione o pendrive —".to_owned()
+                }
+            },
             |d| d.description().to_owned(),
         );
         egui::ComboBox::from_id_salt("device")

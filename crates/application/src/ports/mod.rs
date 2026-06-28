@@ -6,4 +6,4 @@ mod ui_state;
 
 pub use disk_service::DiskService;
 pub use screenshot_writer::ScreenshotWriter;
-pub use ui_state::{DeviceView, UiState};
+pub use ui_state::{DeviceListState, DeviceView, UiState};

@@ -1,34 +1,51 @@
 //! Adapter de estado da UI e bootstrap da janela eframe.
 
-use application::ports::{DeviceView, UiState};
+use application::ports::{DeviceListState, UiState};
 use application::use_cases::ListDevices;
+use infrastructure::linux::SysfsDiskService;
 use infrastructure::screenshot::PngScreenshotWriter;
-use infrastructure::stub::DiskServiceStub;
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
+use std::time::Duration;
 use ui::theme::ThemePreference;
 use ui::{DemoScenario, NurApp};
 
-/// Estado da UI alimentado pelo caso de uso (sobre o stub nesta fase).
+/// Estado da UI alimentado por uma task de polling do udisks2 em background.
 pub(crate) struct LiveUiState {
-    devices: Vec<DeviceView>,
+    shared: Arc<RwLock<DeviceListState>>,
 }
 
 impl LiveUiState {
-    /// Monta o estado executando a listagem uma vez.
-    ///
-    /// # Errors
-    /// Propaga falha do caso de uso.
-    pub(crate) fn build() -> anyhow::Result<Self> {
-        let uc = ListDevices::new(Arc::new(DiskServiceStub::new()));
-        let devices = uc.execute()?;
-        Ok(Self { devices })
+    /// Cria o estado (inicia em `Loading`) e spawna a task que faz polling do
+    /// udisks2 a cada 1,5s, atualizando o estado e repintando a UI.
+    pub(crate) fn spawn(runtime: &tokio::runtime::Handle, ctx: eframe::egui::Context) -> Self {
+        let shared = Arc::new(RwLock::new(DeviceListState::Loading));
+        let writer = Arc::clone(&shared);
+        runtime.spawn(async move {
+            let uc = ListDevices::new(Arc::new(SysfsDiskService::new()));
+            loop {
+                let next = match uc.execute().await {
+                    Ok(views) => DeviceListState::Ready(views),
+                    Err(e) => {
+                        DeviceListState::Error(format!("falha ao detectar dispositivos: {e}"))
+                    }
+                };
+                if let Ok(mut guard) = writer.write() {
+                    *guard = next;
+                }
+                ctx.request_repaint();
+                tokio::time::sleep(Duration::from_secs_f32(1.5)).await;
+            }
+        });
+        Self { shared }
     }
 }
 
 impl UiState for LiveUiState {
-    fn devices(&self) -> Vec<DeviceView> {
-        self.devices.clone()
+    fn device_list(&self) -> DeviceListState {
+        self.shared
+            .read()
+            .map_or(DeviceListState::Loading, |guard| guard.clone())
     }
 }
 
@@ -40,7 +57,7 @@ impl Window {
     ///
     /// # Errors
     /// Retorna erro se o eframe falhar ao iniciar.
-    pub(crate) fn open(state: Arc<dyn UiState>) -> anyhow::Result<()> {
+    pub(crate) fn open(runtime: tokio::runtime::Handle) -> anyhow::Result<()> {
         let options = eframe::NativeOptions {
             viewport: eframe::egui::ViewportBuilder::default()
                 .with_inner_size([460.0, 720.0])
@@ -54,7 +71,11 @@ impl Window {
         eframe::run_native(
             "Nur",
             options,
-            Box::new(|_cc| Ok(Box::new(Self::build_app(state)))),
+            Box::new(move |cc| {
+                // A ponte tokio→egui nasce aqui (precisa do egui_ctx).
+                let state = LiveUiState::spawn(&runtime, cc.egui_ctx.clone());
+                Ok(Box::new(Self::build_app(Arc::new(state))))
+            }),
         )
         .map_err(|e| anyhow::anyhow!("falha ao iniciar a janela: {e}"))
     }

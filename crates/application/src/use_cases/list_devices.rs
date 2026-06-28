@@ -20,8 +20,8 @@ impl ListDevices {
     ///
     /// # Errors
     /// Propaga [`DiskError`] do backend.
-    pub fn execute(&self) -> Result<Vec<DeviceView>, DiskError> {
-        let devices = self.service.list_devices()?;
+    pub async fn execute(&self) -> Result<Vec<DeviceView>, DiskError> {
+        let devices = self.service.list_devices().await?;
         Ok(devices
             .into_iter()
             .map(|d| DeviceView::new(d.path().as_str().to_owned(), d.description()))

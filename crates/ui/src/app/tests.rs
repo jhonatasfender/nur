@@ -1,15 +1,15 @@
 use super::*;
 use application::errors::ScreenshotError;
-use application::ports::DeviceView;
+use application::ports::{DeviceListState, DeviceView};
 use std::path::Path;
 
 struct UiStateFake;
 impl UiState for UiStateFake {
-    fn devices(&self) -> Vec<DeviceView> {
-        vec![DeviceView::new(
+    fn device_list(&self) -> DeviceListState {
+        DeviceListState::Ready(vec![DeviceView::new(
             "/dev/sdb".to_owned(),
             "Teste — 32.0 GB (/dev/sdb)".to_owned(),
-        )]
+        )])
     }
 }
 
