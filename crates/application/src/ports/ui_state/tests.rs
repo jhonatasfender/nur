@@ -15,6 +15,17 @@ fn ui_state_defaults_are_idle_and_none() {
 }
 
 #[test]
+fn ui_state_default_browse_notice_is_none() {
+    struct M;
+    impl UiState for M {
+        fn device_list(&self) -> DeviceListState {
+            DeviceListState::Loading
+        }
+    }
+    assert!(M.browse_notice().is_none());
+}
+
+#[test]
 fn ready_carries_devices() {
     let state =
         DeviceListState::Ready(vec![DeviceView::new("/dev/sdb".to_owned(), "x".to_owned())]);
