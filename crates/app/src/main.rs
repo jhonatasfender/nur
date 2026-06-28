@@ -2,8 +2,6 @@
 
 mod window;
 
-use std::sync::Arc;
-
 fn main() -> std::process::ExitCode {
     let runtime = match tokio::runtime::Runtime::new() {
         Ok(rt) => rt,
@@ -12,17 +10,9 @@ fn main() -> std::process::ExitCode {
             return std::process::ExitCode::FAILURE;
         }
     };
-    let _guard = runtime.enter();
-
-    let state = match window::LiveUiState::build() {
-        Ok(state) => Arc::new(state),
-        Err(e) => {
-            eprintln!("erro ao montar estado: {e}");
-            return std::process::ExitCode::FAILURE;
-        }
-    };
-
-    match window::open(state) {
+    // O runtime fica vivo durante a janela; a task de polling roda nas worker
+    // threads enquanto o eframe bloqueia a main thread.
+    match window::Window::open(runtime.handle().clone()) {
         Ok(()) => std::process::ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("erro: {e}");

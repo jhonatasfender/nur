@@ -21,8 +21,9 @@ impl Default for DiskServiceStub {
     }
 }
 
+#[async_trait::async_trait]
 impl DiskService for DiskServiceStub {
-    fn list_devices(&self) -> Result<Vec<Device>, DiskError> {
+    async fn list_devices(&self) -> Result<Vec<Device>, DiskError> {
         Ok(vec![
             Device::new(
                 DevicePath::new("/dev/sdb".to_owned()),
