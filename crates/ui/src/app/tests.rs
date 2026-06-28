@@ -1,6 +1,7 @@
 use super::*;
 use application::errors::ScreenshotError;
 use application::ports::{DeviceListState, DeviceView};
+use domain::DevicePath;
 use std::path::Path;
 
 struct UiStateFake;
@@ -13,6 +14,13 @@ impl UiState for UiStateFake {
     }
 }
 
+struct CommandsFake;
+impl UiCommands for CommandsFake {
+    fn pick_iso(&self) {}
+    fn start(&self, _device: DevicePath) {}
+    fn cancel(&self) {}
+}
+
 struct NoopWriter;
 impl ScreenshotWriter for NoopWriter {
     fn write(&self, _: &[u8], _: u32, _: u32, _: &Path) -> Result<(), ScreenshotError> {
@@ -22,7 +30,11 @@ impl ScreenshotWriter for NoopWriter {
 
 #[test]
 fn builder_sets_theme() {
-    let app =
-        NurApp::new(Arc::new(UiStateFake), Arc::new(NoopWriter)).with_theme(ThemePreference::Light);
+    let app = NurApp::new(
+        Arc::new(UiStateFake),
+        Arc::new(CommandsFake),
+        Arc::new(NoopWriter),
+    )
+    .with_theme(ThemePreference::Light);
     assert_eq!(app.theme(), ThemePreference::Light);
 }

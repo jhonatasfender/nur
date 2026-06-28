@@ -2,7 +2,7 @@
 
 use crate::capture::Capturer;
 use crate::theme::{Fonts, ThemeKit, ThemePreference};
-use application::ports::{ScreenshotWriter, UiState};
+use application::ports::{ScreenshotWriter, UiCommands, UiState};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -26,31 +26,16 @@ pub(crate) enum Mode {
     Format,
 }
 
-/// Fase da operação em andamento.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Phase {
-    /// Nada em andamento.
-    Idle,
-    /// Preparando o dispositivo (indeterminado).
-    Preparing,
-    /// Gravando/formatando (determinado).
-    Working,
-    /// Verificando após gravar.
-    Verifying,
-    /// Concluído com sucesso.
-    Done,
-}
-
 /// App egui do Nur. Lê o estado por uma porta injetada.
 pub struct NurApp {
     state: Arc<dyn UiState>,
+    commands: Arc<dyn UiCommands>,
     theme: ThemePreference,
     theme_installed: bool,
     fonts_installed: bool,
     capturer: Capturer,
     selected: Option<usize>,
     mode: Mode,
-    iso_selected: bool,
     partition: usize,
     target: usize,
     filesystem: usize,
@@ -58,23 +43,26 @@ pub struct NurApp {
     quick_format: bool,
     modal_open: bool,
     confirm_text: String,
-    phase: Phase,
-    progress: f32,
 }
 
 impl NurApp {
-    /// Cria o app com o estado e o gravador de capturas injetados (tema escuro).
+    /// Cria o app com o estado, os comandos e o gravador de capturas injetados
+    /// (tema escuro por padrão).
     #[must_use]
-    pub fn new(state: Arc<dyn UiState>, screenshots: Arc<dyn ScreenshotWriter>) -> Self {
+    pub fn new(
+        state: Arc<dyn UiState>,
+        commands: Arc<dyn UiCommands>,
+        screenshots: Arc<dyn ScreenshotWriter>,
+    ) -> Self {
         Self {
             state,
+            commands,
             theme: ThemePreference::Dark,
             theme_installed: false,
             fonts_installed: false,
             capturer: Capturer::new(screenshots, None),
             selected: None,
             mode: Mode::Boot,
-            iso_selected: false,
             partition: 0,
             target: 0,
             filesystem: 0,
@@ -82,8 +70,6 @@ impl NurApp {
             quick_format: true,
             modal_open: false,
             confirm_text: String::new(),
-            phase: Phase::Idle,
-            progress: 0.0,
         }
     }
 
@@ -105,38 +91,6 @@ impl NurApp {
     pub(crate) fn theme(&self) -> ThemePreference {
         self.theme
     }
-
-    // Avança a simulação de progresso enquanto há operação em andamento.
-    fn tick(&mut self, ctx: &egui::Context) {
-        if matches!(self.phase, Phase::Idle | Phase::Done) {
-            return;
-        }
-        ctx.request_repaint();
-        let dt = ctx.input(|i| i.stable_dt).min(0.1);
-        match self.phase {
-            Phase::Preparing => {
-                self.progress += dt * 0.8;
-                if self.progress >= 1.0 {
-                    self.progress = 0.0;
-                    self.phase = Phase::Working;
-                }
-            }
-            Phase::Working => {
-                self.progress += dt * 0.35;
-                if self.progress >= 1.0 {
-                    self.progress = 1.0;
-                    self.phase = Phase::Verifying;
-                }
-            }
-            Phase::Verifying => {
-                self.progress += dt * 1.2;
-                if self.progress >= 1.0 {
-                    self.phase = Phase::Done;
-                }
-            }
-            Phase::Idle | Phase::Done => {}
-        }
-    }
 }
 
 impl eframe::App for NurApp {
@@ -146,7 +100,8 @@ impl eframe::App for NurApp {
         [0.0, 0.0, 0.0, 0.0]
     }
 
-    /// Instala fonte/tema, trata captura e avança o progresso.
+    /// Instala fonte/tema e trata captura. O progresso é dirigido pelo estado
+    /// real (a ponte do app repinta a UI ao atualizar `write_state`).
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if !self.fonts_installed {
             Fonts::install(ctx);
@@ -156,7 +111,6 @@ impl eframe::App for NurApp {
             ThemeKit::install(ctx, self.theme);
             self.theme_installed = true;
         }
-        self.tick(ctx);
         if self.capturer.process(ctx) {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
         }
