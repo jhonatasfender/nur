@@ -3,6 +3,7 @@
 mod fat32;
 mod iso_file_inspector;
 mod mount_table;
+mod native_fat_formatter;
 mod offset_volume;
 mod partitioner;
 mod raw_copier;
@@ -12,6 +13,7 @@ mod udisks2_device_browser;
 mod udisks2_formatter;
 
 pub use iso_file_inspector::IsoFileInspector;
+pub use native_fat_formatter::NativeFatFormatter;
 pub(crate) use mount_table::MountTable;
 pub(crate) use raw_copier::RawCopier;
 pub use sysfs_disk_service::SysfsDiskService;

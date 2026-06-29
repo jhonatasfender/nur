@@ -22,7 +22,8 @@ impl<T: Read + Write + Seek> OffsetVolume<T> {
         }
     }
 
-    /// Devolve o IO interno.
+    /// Devolve o IO interno (usado em testes).
+    #[cfg(test)]
     pub(crate) fn into_inner(self) -> T {
         self.inner
     }
