@@ -14,7 +14,7 @@ pub enum ThemePreference {
 impl ThemePreference {
     /// Alterna entre claro e escuro.
     #[must_use]
-    pub const fn toggle(self) -> Self {
+    pub(crate) const fn toggle(self) -> Self {
         match self {
             Self::Light => Self::Dark,
             Self::Dark => Self::Light,
@@ -23,7 +23,7 @@ impl ThemePreference {
 
     /// Paleta correspondente a esta preferência.
     #[must_use]
-    pub const fn palette(self) -> Palette {
+    pub(crate) const fn palette(self) -> Palette {
         match self {
             Self::Light => Palette::light(),
             Self::Dark => Palette::dark(),
@@ -32,11 +32,11 @@ impl ThemePreference {
 }
 
 /// Instala o estilo do Nur (cores) num contexto egui.
-pub struct ThemeKit;
+pub(crate) struct ThemeKit;
 
 impl ThemeKit {
     /// Aplica os `Visuals` derivados da preferência ao contexto.
-    pub fn install(ctx: &egui::Context, pref: ThemePreference) {
+    pub(crate) fn install(ctx: &egui::Context, pref: ThemePreference) {
         let palette = pref.palette();
         let (theme, egui_pref) = match pref {
             ThemePreference::Light => (egui::Theme::Light, egui::ThemePreference::Light),

@@ -4,6 +4,7 @@ mod fonts;
 mod palette;
 mod theme_kit;
 
-pub use fonts::Fonts;
-pub use palette::Palette;
-pub use theme_kit::{ThemeKit, ThemePreference};
+pub(crate) use fonts::Fonts;
+pub(crate) use palette::Palette;
+pub(crate) use theme_kit::ThemeKit;
+pub use theme_kit::ThemePreference;

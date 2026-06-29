@@ -8,14 +8,14 @@ use std::io::{Read, Write};
 const CHUNK: usize = 4 * 1024 * 1024;
 
 /// Rotinas de cópia/verificação sobre `Read`/`Write` genéricos.
-pub struct RawCopier;
+pub(crate) struct RawCopier;
 
 impl RawCopier {
     /// Copia `total` bytes de `source` para `dest` em blocos de 4 MiB.
     ///
     /// # Errors
     /// Retorna [`WriteError::Cancelled`] se cancelado, ou [`WriteError::Io`] em falha de IO.
-    pub fn copy<R: Read, W: Write>(
+    pub(crate) fn copy<R: Read, W: Write>(
         source: &mut R,
         dest: &mut W,
         total: u64,
@@ -48,7 +48,7 @@ impl RawCopier {
     /// # Errors
     /// Retorna [`WriteError::VerificationMismatch`] em divergência, [`WriteError::Cancelled`]
     /// se cancelado, ou [`WriteError::Io`] em falha de IO.
-    pub fn verify<A: Read, B: Read>(
+    pub(crate) fn verify<A: Read, B: Read>(
         written: &mut A,
         original: &mut B,
         total: u64,
