@@ -11,13 +11,12 @@ use std::sync::Arc;
 /// de forma headless: renderiza alguns frames, grava o PNG e sinaliza para a
 /// janela fechar. A gravação em arquivo é delegada ao [`ScreenshotWriter`], de
 /// modo que a camada de apresentação não toca o sistema de arquivos.
-pub struct Capturer {
+pub(crate) struct Capturer {
     writer: Arc<dyn ScreenshotWriter>,
     auto: Option<PathBuf>,
     auto_requested: bool,
     frames: u32,
     counter: u32,
-    last_msg: Option<String>,
     // Há uma captura solicitada aguardando o evento `Event::Screenshot`.
     pending: bool,
 }
@@ -25,14 +24,13 @@ pub struct Capturer {
 impl Capturer {
     /// Cria o capturador com o gravador injetado e o destino automático opcional.
     #[must_use]
-    pub fn new(writer: Arc<dyn ScreenshotWriter>, auto: Option<PathBuf>) -> Self {
+    pub(crate) fn new(writer: Arc<dyn ScreenshotWriter>, auto: Option<PathBuf>) -> Self {
         Self {
             writer,
             auto,
             auto_requested: false,
             frames: 0,
             counter: 0,
-            last_msg: None,
             pending: false,
         }
     }
@@ -42,22 +40,10 @@ impl Capturer {
         self.auto = auto;
     }
 
-    /// Indica se a captura automática está configurada.
-    #[must_use]
-    pub fn auto_enabled(&self) -> bool {
-        self.auto.is_some()
-    }
-
-    /// Mensagem de status da última captura, se houver.
-    #[must_use]
-    pub fn message(&self) -> Option<&str> {
-        self.last_msg.as_deref()
-    }
-
     /// Processa um frame: trata F12 / modo automático e salva screenshots prontos.
     ///
     /// Retorna `true` quando a captura automática concluiu (a janela deve fechar).
-    pub fn process(&mut self, ctx: &egui::Context) -> bool {
+    pub(crate) fn process(&mut self, ctx: &egui::Context) -> bool {
         if ctx.input(|i| i.key_pressed(egui::Key::F12)) {
             Self::request(ctx);
             self.pending = true;
@@ -119,11 +105,8 @@ impl Capturer {
                 .writer
                 .write(image.as_raw(), width as u32, height as u32, &dest)
             {
-                Ok(()) => {
-                    self.last_msg = Some(format!("captura salva em {}", dest.display()));
-                    auto_done = self.auto.is_some();
-                }
-                Err(e) => self.last_msg = Some(format!("falha na captura: {e}")),
+                Ok(()) => auto_done = self.auto.is_some(),
+                Err(e) => eprintln!("falha na captura: {e}"),
             }
         }
         auto_done
