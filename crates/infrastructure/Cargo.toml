@@ -13,6 +13,9 @@ async-trait = { workspace = true }
 tokio = { workspace = true }
 zbus = { workspace = true }
 rfd = { workspace = true }
+gpt = { workspace = true }
+fatfs = { workspace = true }
+mbrman = { workspace = true }
 
 [lints]
 workspace = true

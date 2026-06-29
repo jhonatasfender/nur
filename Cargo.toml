@@ -25,6 +25,9 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 async-trait = "0.1"
 zbus = "5"
 rfd = "0.15"
+gpt = "4"
+fatfs = "0.3"
+mbrman = "0.5"
 
 [workspace.lints.clippy]
 # Piso obrigatório e camada pedante (nursery deliberadamente OFF), espelhando o solana.

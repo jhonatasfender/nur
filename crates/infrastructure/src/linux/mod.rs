@@ -2,6 +2,7 @@
 
 mod iso_file_inspector;
 mod mount_table;
+mod offset_volume;
 mod raw_copier;
 mod sysfs_disk_service;
 mod udisks2_block_writer;
