@@ -49,20 +49,23 @@ impl Udisks2Formatter {
         }
     }
 
-    // Traduz erros do D-Bus em variantes de FormatError.
-    fn classify_err(e: &zbus::Error, fs_human: &str) -> FormatError {
-        let lower = e.to_string().to_lowercase();
+    // Traduz a mensagem de erro do D-Bus em uma variante de FormatError.
+    fn classify_err(message: &str, fs_human: &str) -> FormatError {
+        let lower = message.to_lowercase();
         if lower.contains("notauthorized") || lower.contains("not authorized") {
             FormatError::Unauthorized
         } else if lower.contains("busy") || lower.contains("mounted") || lower.contains("in use") {
             FormatError::DeviceBusy
-        } else if lower.contains("not found")
-            || lower.contains("failed to execute")
-            || lower.contains("no such file")
+        } else if !fs_human.is_empty()
+            && (lower.contains("not found")
+                || lower.contains("failed to execute")
+                || lower.contains("no such file"))
         {
+            // Só o passo de mkfs (com `fs_human` preenchido) pode faltar ferramenta;
+            // nas chamadas de tabela/partição isso seria um falso-positivo.
             FormatError::ToolMissing(fs_human.to_owned())
         } else {
-            FormatError::Backend(e.to_string())
+            FormatError::Backend(message.to_owned())
         }
     }
 
@@ -77,7 +80,7 @@ impl Udisks2Formatter {
             &(table, options),
         )
         .map(drop)
-        .map_err(|e| Self::classify_err(&e, ""))
+        .map_err(|e| Self::classify_err(&e.to_string(), ""))
     }
 
     // Cria uma partição cobrindo o disco; devolve o object path da partição.
@@ -91,7 +94,7 @@ impl Udisks2Formatter {
                 "CreatePartition",
                 &(0u64, 0u64, "", "", options),
             )
-            .map_err(|e| Self::classify_err(&e, ""))?;
+            .map_err(|e| Self::classify_err(&e.to_string(), ""))?;
         let part: OwnedObjectPath = reply
             .body()
             .deserialize()
@@ -121,7 +124,7 @@ impl Udisks2Formatter {
             &(fs, options),
         )
         .map(drop)
-        .map_err(|e| Self::classify_err(&e, fs_human))
+        .map_err(|e| Self::classify_err(&e.to_string(), fs_human))
     }
 
     // Fluxo bloqueante completo.
