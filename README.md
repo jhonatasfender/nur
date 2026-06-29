@@ -9,6 +9,15 @@
 
 **Nur** é um app desktop em **Rust** para **formatar pendrives** e **criar pendrives bootáveis a partir de uma imagem ISO** — com foco em ser **simples, prático e à prova de acidentes** (a operação é destrutiva).
 
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/04-light.png" alt="Tela principal do Nur — tema claro" width="360"/><br/><sub>Tema claro</sub></td>
+    <td align="center"><img src="docs/screenshots/02-dark-ready.png" alt="Tela principal do Nur — tema escuro" width="360"/><br/><sub>Tema escuro</sub></td>
+  </tr>
+</table>
+
+<sub>Tela principal do Nur — temas claro e escuro.</sub>
+
 ## Características
 
 - 🖥️ **UI nativa** em [egui/eframe](https://github.com/emilk/egui) — painel único, leve e moderno.
@@ -19,7 +28,16 @@
 
 ## Status
 
-🚧 **Em design/planejamento.** Ainda não há código — a documentação de design, pesquisa e decisões está completa.
+As **Fases 1–5 estão implementadas e mergeadas**; a **Fase 6** (modo Formatar real) está em **PR aberta**.
+
+- ✅ **Fase 1 — Fundação:** workspace hexagonal (`domain`→`application`→`infrastructure`→`app`→`ui`) com lints exigentes e CI/Release.
+- ✅ **Fase 2 — UI completa:** egui/eframe fiel ao protótipo (tema claro/escuro, fonte Inter, janela arredondada, modal "digite APAGAR", componentes reutilizáveis).
+- ✅ **Fase 3 — Enumeração real (Linux):** descoberta de pendrives via **sysfs** (`/sys/block`) com atualização ao vivo (pivot de udisks2 → sysfs por performance).
+- ✅ **Fase 4 — Gravação raw da ISO:** via udisks2/polkit (`Block.OpenDevice`, sem rodar como root), com detecção isohybrid, progresso real, cancelamento e verificação.
+- ✅ **Fase 5 — Abrir no gerenciador:** abrir o pendrive no gerenciador de arquivos do SO.
+- 🔜 **Fase 6 — Modo Formatar real:** em PR aberta (ainda não nesta base).
+
+Ver detalhes e índice em [`docs/README.md`](docs/README.md).
 
 ## Documentação
 
