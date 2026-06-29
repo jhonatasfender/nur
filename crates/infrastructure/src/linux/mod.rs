@@ -1,5 +1,6 @@
 //! Adapters de IO para Linux.
 
+mod fat32;
 mod iso_file_inspector;
 mod mount_table;
 mod offset_volume;
