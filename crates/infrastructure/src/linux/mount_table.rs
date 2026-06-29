@@ -1,12 +1,12 @@
 //! Parser puro de `/proc/mounts` para achar o ponto de montagem de um device.
 
 /// Localiza pontos de montagem de partições no `/proc/mounts`.
-pub struct MountTable;
+pub(crate) struct MountTable;
 
 impl MountTable {
     /// Primeiro mount point cujo device é `/dev/<name>` ou `/dev/<name><dígitos>`.
     #[must_use]
-    pub fn mount_point_for(contents: &str, name: &str) -> Option<String> {
+    pub(crate) fn mount_point_for(contents: &str, name: &str) -> Option<String> {
         contents.lines().find_map(|line| {
             let mut fields = line.split(' ');
             let source = fields.next()?;

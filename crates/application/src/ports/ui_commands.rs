@@ -15,4 +15,7 @@ pub trait UiCommands: Send + Sync {
 
     /// Abre o pendrive no gerenciador de arquivos do SO.
     fn open_device(&self, device: DevicePath);
+
+    /// Formata o pendrive conforme as opções.
+    fn format(&self, device: DevicePath, options: crate::ports::FormatOptions);
 }

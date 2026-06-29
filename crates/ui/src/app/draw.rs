@@ -125,6 +125,9 @@ impl NurApp {
 
     fn mode_selector(&mut self, ui: &mut egui::Ui, palette: Palette) {
         FieldLabel::show(ui, palette, "O QUE DESEJA FAZER?");
+        // Durante uma operação destrutiva, o modo fica travado (senão o texto de
+        // status trocaria no meio da gravação/formatação).
+        let locked = self.in_progress();
         egui::Frame::NONE
             .fill(palette.control())
             .stroke(egui::Stroke::new(1.0, palette.border()))
@@ -156,10 +159,10 @@ impl NurApp {
                         rect.min + egui::vec2(i as f32 * half, 0.0),
                         egui::vec2(half, rect.height()),
                     );
-                    if ui
+                    let clicked = ui
                         .interact(cell, egui::Id::new(("mode", i)), egui::Sense::click())
-                        .clicked()
-                    {
+                        .clicked();
+                    if clicked && !locked {
                         self.mode = mode;
                     }
                     let color = if self.mode == mode {

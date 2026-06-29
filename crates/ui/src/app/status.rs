@@ -4,7 +4,7 @@ use super::{Mode, NurApp};
 use crate::components::{PrimaryButton, SecondaryButton};
 use crate::theme::Palette;
 use application::ports::WriteState;
-use domain::IsoKind;
+use domain::{IsoKind, VolumeLabel};
 
 impl NurApp {
     // Há uma operação destrutiva em andamento?
@@ -15,14 +15,16 @@ impl NurApp {
         )
     }
 
-    // Pronto para iniciar? (dispositivo + ISO isohybrid quando em modo bootável)
+    // Pronto para iniciar? Boot exige ISO isohybrid; Format exige rótulo válido.
     pub(super) fn ready(&self) -> bool {
-        let iso_ok = self.mode == Mode::Format
-            || self
+        let mode_ok = match self.mode {
+            Mode::Format => VolumeLabel::parse(&self.label).is_ok(),
+            Mode::Boot => self
                 .state
                 .selected_iso()
-                .is_some_and(|s| s.kind() == IsoKind::Isohybrid);
-        self.selected.is_some() && iso_ok && !self.in_progress()
+                .is_some_and(|s| s.kind() == IsoKind::Isohybrid),
+        };
+        self.selected.is_some() && mode_ok && !self.in_progress()
     }
 
     // Fração 0..1 da barra a partir do estado real.
@@ -95,10 +97,19 @@ impl NurApp {
         match state {
             WriteState::Idle if self.ready() => ("Pronto para iniciar.".to_owned(), muted),
             WriteState::Idle => ("Selecione um dispositivo para começar.".to_owned(), muted),
+            WriteState::Preparing if self.mode == Mode::Format => {
+                ("Formatando\u{2026}".to_owned(), muted)
+            }
             WriteState::Preparing => ("Preparando dispositivo\u{2026}".to_owned(), muted),
-            WriteState::Writing { .. } => ("Gravando imagem\u{2026}".to_owned(), muted),
+            WriteState::Writing { .. } if self.mode == Mode::Boot => {
+                ("Gravando imagem\u{2026}".to_owned(), muted)
+            }
+            WriteState::Writing { .. } => ("Formatando\u{2026}".to_owned(), muted),
             WriteState::Verifying { .. } => ("Verificando\u{2026}".to_owned(), muted),
-            WriteState::Done => ("Pendrive bootável pronto!".to_owned(), palette.success()),
+            WriteState::Done if self.mode == Mode::Boot => {
+                ("Pendrive bootável pronto!".to_owned(), palette.success())
+            }
+            WriteState::Done => ("Formatação concluída!".to_owned(), palette.success()),
             WriteState::Failed(msg) => (msg.clone(), palette.destructive()),
             WriteState::Cancelled => (
                 "Cancelado \u{2014} pendrive incompleto, regrave.".to_owned(),

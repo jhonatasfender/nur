@@ -50,6 +50,23 @@ pub enum WriteError {
     Cancelled,
 }
 
+/// Falhas ao formatar o dispositivo.
+#[derive(Debug, thiserror::Error)]
+pub enum FormatError {
+    /// O polkit negou a autorização.
+    #[error("autorização negada")]
+    Unauthorized,
+    /// O dispositivo está em uso.
+    #[error("dispositivo ocupado")]
+    DeviceBusy,
+    /// Falta a ferramenta de mkfs para o filesystem escolhido.
+    #[error("instale as ferramentas para formatar em {0}")]
+    ToolMissing(String),
+    /// Falha do backend (udisks/D-Bus).
+    #[error("falha ao formatar: {0}")]
+    Backend(String),
+}
+
 /// Falhas ao abrir o pendrive no gerenciador de arquivos.
 #[derive(Debug, thiserror::Error)]
 pub enum BrowseError {
