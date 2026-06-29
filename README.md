@@ -9,6 +9,15 @@
 
 **Nur** é um app desktop em **Rust** para **formatar pendrives** e **criar pendrives bootáveis a partir de uma imagem ISO** — com foco em ser **simples, prático e à prova de acidentes** (a operação é destrutiva).
 
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/04-light.png" alt="Tela principal do Nur — tema claro" width="360"/><br/><sub>Tema claro</sub></td>
+    <td align="center"><img src="docs/screenshots/02-dark-ready.png" alt="Tela principal do Nur — tema escuro" width="360"/><br/><sub>Tema escuro</sub></td>
+  </tr>
+</table>
+
+<sub>Tela principal do Nur — temas claro e escuro.</sub>
+
 ## Características
 
 - 🖥️ **UI nativa** em [egui/eframe](https://github.com/emilk/egui) — painel único, leve e moderno.

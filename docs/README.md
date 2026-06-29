@@ -6,6 +6,12 @@ App desktop em **Rust** para **formatar pendrives** e **criar pendrives bootáve
 
 > **Projeto de referência:** `/home/jonatas/projects/github/solana` — herdamos dele arquitetura, lints e abordagem de UI. Ver `pesquisa/01-projeto-referencia-solana.md`.
 
+| Tema claro | Tema escuro |
+|:----------:|:-----------:|
+| ![Tela principal do Nur — tema claro](screenshots/04-light.png) | ![Tela principal do Nur — tema escuro](screenshots/02-dark-ready.png) |
+
+*Tela principal do Nur — temas claro e escuro.*
+
 ## Índice
 
 ### Especificação e planos
