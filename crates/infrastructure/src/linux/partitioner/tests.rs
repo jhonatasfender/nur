@@ -37,6 +37,7 @@ fn gpt_writes_one_partition() {
 
 #[test]
 fn mbr_writes_one_fat32_partition() {
+    use std::io::{Read, Seek, SeekFrom};
     let total = 64 * 1024 * 1024u64;
     let mut dev = Cursor::new(vec![0u8; total as usize]);
     let (start, len) = Partitioner::single_partition(total);
@@ -44,7 +45,11 @@ fn mbr_writes_one_fat32_partition() {
         Partitioner::write_table(&mut dev, PartitionScheme::Mbr, start, len).expect("escreve MBR");
     assert_eq!(pstart, start);
     assert_eq!(plen, len);
-    let mbr = mbrman::MBR::read_from(&mut dev, 512).expect("reabre MBR");
-    assert_eq!(mbr[1].sys, 0x0c);
-    assert!(mbr[1].sectors > 0);
+    let mut bytes = [0u8; 512];
+    dev.seek(SeekFrom::Start(0)).unwrap();
+    dev.read_exact(&mut bytes).unwrap();
+    assert_eq!(bytes[0x1BE + 4], 0x0C); // tipo FAT32 LBA
+    assert_eq!([bytes[510], bytes[511]], [0x55, 0xAA]); // assinatura
+    let lba = u32::from_le_bytes(bytes[0x1BE + 8..0x1BE + 12].try_into().unwrap());
+    assert_eq!(u64::from(lba), start / 512);
 }

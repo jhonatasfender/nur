@@ -61,23 +61,23 @@ impl Partitioner {
         Ok((first * SECTOR, (last - first + 1) * SECTOR))
     }
 
-    fn write_mbr<T: Read + Write + Seek + Debug>(
-        dev: &mut T,
-        start: u64,
-        len: u64,
-    ) -> io::Result<(u64, u64)> {
-        let mut mbr =
-            mbrman::MBR::new_from(dev, u32::try_from(SECTOR).unwrap_or(512), [0, 0, 0, 0])
-                .map_err(Self::to_io)?;
-        mbr[1] = mbrman::MBRPartitionEntry {
-            boot: mbrman::BOOT_INACTIVE,
-            first_chs: mbrman::CHS::empty(),
-            sys: 0x0c,
-            last_chs: mbrman::CHS::empty(),
-            starting_lba: u32::try_from(start / SECTOR).unwrap_or(0),
-            sectors: u32::try_from(len / SECTOR).unwrap_or(0),
-        };
-        mbr.write_into(dev).map_err(Self::to_io)?;
+    // Escreve uma MBR (DOS) mínima com 1 partição FAT32 LBA (tipo 0x0C).
+    // É só o setor 0 (512 bytes): entrada em 0x1BE + assinatura 0x55AA em 0x1FE.
+    fn write_mbr<T: Write + Seek>(dev: &mut T, start: u64, len: u64) -> io::Result<(u64, u64)> {
+        let start_lba = u32::try_from(start / SECTOR).unwrap_or(0);
+        let sectors = u32::try_from(len / SECTOR).unwrap_or(0);
+        let mut sector = [0u8; 512];
+        let e = 0x1BE; // 1ª entrada de partição (16 bytes)
+        sector[e] = 0x00; // não-ativa
+        sector[e + 1..e + 4].copy_from_slice(&[0xFE, 0xFF, 0xFF]); // CHS first (placeholder LBA)
+        sector[e + 4] = 0x0C; // tipo: FAT32 LBA
+        sector[e + 5..e + 8].copy_from_slice(&[0xFE, 0xFF, 0xFF]); // CHS last
+        sector[e + 8..e + 12].copy_from_slice(&start_lba.to_le_bytes());
+        sector[e + 12..e + 16].copy_from_slice(&sectors.to_le_bytes());
+        sector[510] = 0x55;
+        sector[511] = 0xAA;
+        dev.seek(SeekFrom::Start(0))?;
+        dev.write_all(&sector)?;
         Ok((start, len))
     }
 
