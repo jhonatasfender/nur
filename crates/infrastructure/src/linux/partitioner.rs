@@ -66,8 +66,9 @@ impl Partitioner {
         start: u64,
         len: u64,
     ) -> io::Result<(u64, u64)> {
-        let mut mbr = mbrman::MBR::new_from(dev, u32::try_from(SECTOR).unwrap_or(512), [0, 0, 0, 0])
-            .map_err(Self::to_io)?;
+        let mut mbr =
+            mbrman::MBR::new_from(dev, u32::try_from(SECTOR).unwrap_or(512), [0, 0, 0, 0])
+                .map_err(Self::to_io)?;
         mbr[1] = mbrman::MBRPartitionEntry {
             boot: mbrman::BOOT_INACTIVE,
             first_chs: mbrman::CHS::empty(),

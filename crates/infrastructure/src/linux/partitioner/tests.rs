@@ -21,8 +21,8 @@ fn gpt_writes_one_partition() {
     let total = 64 * 1024 * 1024u64;
     let mut dev = Cursor::new(vec![0u8; total as usize]);
     let (start, len) = Partitioner::single_partition(total);
-    let (pstart, plen) = Partitioner::write_table(&mut dev, PartitionScheme::Gpt, start, len)
-        .expect("escreve GPT");
+    let (pstart, plen) =
+        Partitioner::write_table(&mut dev, PartitionScheme::Gpt, start, len).expect("escreve GPT");
     // O crate `gpt` posiciona na 1ª LBA usável; o offset real volta no retorno.
     assert!(pstart >= 512);
     assert!(plen > 0);

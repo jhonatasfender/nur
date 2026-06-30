@@ -97,7 +97,8 @@ impl NurApp {
                 LabeledInput::show(&mut cols[1], palette, "Rótulo do volume", &mut self.label);
             });
         } else {
-            // No modo Formatar, "Sistema alvo" é conceito de boot — ocultado.
+            // No modo Formatar: só GPT/MBR + Rótulo (sempre FAT32, nativo em Rust;
+            // "Sistema alvo" e "Sistema de arquivos" não se aplicam aqui).
             ui.columns(2, |cols| {
                 LabeledSelect::show(
                     &mut cols[0],
@@ -107,17 +108,8 @@ impl NurApp {
                     &PARTITIONS,
                     &mut self.partition,
                 );
-                LabeledSelect::show(
-                    &mut cols[1],
-                    palette,
-                    "fs",
-                    "Sistema de arquivos",
-                    &FILESYSTEMS,
-                    &mut self.filesystem,
-                );
+                LabeledInput::show(&mut cols[1], palette, "Rótulo do volume", &mut self.label);
             });
-            ui.add_space(12.0);
-            LabeledInput::show(ui, palette, "Rótulo do volume", &mut self.label);
         }
         ui.add_space(12.0);
         Checkbox::show(ui, palette, "Formatação rápida", &mut self.quick_format);
