@@ -1,7 +1,7 @@
 use super::FormatDevice;
 use crate::errors::FormatError;
 use crate::ports::{DeviceFormatter, FormatOptions, ProgressSink, WriteProgress};
-use domain::{DevicePath, FilesystemKind, PartitionScheme, VolumeLabel};
+use domain::{DevicePath, PartitionScheme, VolumeLabel};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -22,7 +22,6 @@ impl ProgressSink for NoopSink {
 fn options() -> FormatOptions {
     FormatOptions::new(
         PartitionScheme::Gpt,
-        FilesystemKind::Fat32,
         VolumeLabel::parse("BOOTUSB").unwrap(),
         true,
     )

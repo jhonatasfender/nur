@@ -13,5 +13,6 @@ Registro das decisões tomadas no design do Formatador de Pendrive, com contexto
 | [0007](0007-tema-claro-escuro.md) | Tema claro/escuro (desvio do solana dark-only) | Aceita |
 | [0008](0008-padroes-qualidade-lints.md) | Padrões de qualidade e lints herdados | Aceita |
 | [0009](0009-nome-do-projeto.md) | Nome do projeto: **Nur (نور)** — "luz" | Aceita |
+| [0010](0010-nucleo-rust-nativo.md) | Núcleo Rust-nativo (sem ferramentas externas) + formatador FAT32 nativo | Aceita |
 
 > Fontes que embasam estas decisões: `../pesquisa/01`, `../pesquisa/02`, `../pesquisa/03`.

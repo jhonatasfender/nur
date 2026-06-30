@@ -24,8 +24,8 @@ fn format_error_messages_are_in_ptbr() {
     assert_eq!(FormatError::Unauthorized.to_string(), "autorização negada");
     assert_eq!(FormatError::DeviceBusy.to_string(), "dispositivo ocupado");
     assert_eq!(
-        FormatError::ToolMissing("exFAT".to_owned()).to_string(),
-        "instale as ferramentas para formatar em exFAT"
+        FormatError::Backend("x".to_owned()).to_string(),
+        "falha ao formatar: x"
     );
 }
 

@@ -1,12 +1,11 @@
 //! Opções de formatação escolhidas pelo usuário.
 
-use domain::{FilesystemKind, PartitionScheme, VolumeLabel};
+use domain::{PartitionScheme, VolumeLabel};
 
-/// Como formatar o dispositivo.
+/// Como formatar o dispositivo (sempre FAT32 neste incremento).
 #[derive(Debug, Clone)]
 pub struct FormatOptions {
     scheme: PartitionScheme,
-    filesystem: FilesystemKind,
     label: VolumeLabel,
     quick: bool,
 }
@@ -14,15 +13,9 @@ pub struct FormatOptions {
 impl FormatOptions {
     /// Cria as opções.
     #[must_use]
-    pub fn new(
-        scheme: PartitionScheme,
-        filesystem: FilesystemKind,
-        label: VolumeLabel,
-        quick: bool,
-    ) -> Self {
+    pub fn new(scheme: PartitionScheme, label: VolumeLabel, quick: bool) -> Self {
         Self {
             scheme,
-            filesystem,
             label,
             quick,
         }
@@ -32,12 +25,6 @@ impl FormatOptions {
     #[must_use]
     pub fn scheme(&self) -> PartitionScheme {
         self.scheme
-    }
-
-    /// Filesystem a criar.
-    #[must_use]
-    pub fn filesystem(&self) -> FilesystemKind {
-        self.filesystem
     }
 
     /// Rótulo do volume.

@@ -11,7 +11,7 @@ use application::ports::{
 use application::use_cases::{CreateBootable, FormatDevice};
 use domain::{ByteSize, DevicePath, IsoKind};
 use infrastructure::linux::{
-    IsoFileInspector, Udisks2BlockWriter, Udisks2DeviceBrowser, Udisks2Formatter,
+    IsoFileInspector, NativeFatFormatter, Udisks2BlockWriter, Udisks2DeviceBrowser,
 };
 use infrastructure::picker::RfdIsoPicker;
 use std::path::PathBuf;
@@ -132,7 +132,7 @@ impl UiCommands for AppCommands {
         let ctx = self.ctx.clone();
         let write = Arc::clone(&self.write);
         self.runtime.spawn(async move {
-            let uc = FormatDevice::new(Arc::new(Udisks2Formatter::new()));
+            let uc = FormatDevice::new(Arc::new(NativeFatFormatter::new()));
             let sink: Arc<dyn ProgressSink> =
                 Arc::new(AppProgressSink::new(Arc::clone(&write), ctx.clone()));
             let next = match uc.execute(device, options, sink).await {

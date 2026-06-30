@@ -59,10 +59,7 @@ pub enum FormatError {
     /// O dispositivo está em uso.
     #[error("dispositivo ocupado")]
     DeviceBusy,
-    /// Falta a ferramenta de mkfs para o filesystem escolhido.
-    #[error("instale as ferramentas para formatar em {0}")]
-    ToolMissing(String),
-    /// Falha do backend (udisks/D-Bus).
+    /// Falha do backend (udisks/D-Bus/IO).
     #[error("falha ao formatar: {0}")]
     Backend(String),
 }

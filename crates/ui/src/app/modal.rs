@@ -93,7 +93,6 @@ impl NurApp {
                 if let Ok(label) = domain::VolumeLabel::parse(&self.label) {
                     let options = application::ports::FormatOptions::new(
                         self.partition_scheme(),
-                        self.filesystem_kind(),
                         label,
                         self.quick_format,
                     );
@@ -109,16 +108,6 @@ impl NurApp {
             domain::PartitionScheme::Gpt
         } else {
             domain::PartitionScheme::Mbr
-        }
-    }
-
-    // Índice do seletor de filesystem → value object de domínio.
-    fn filesystem_kind(&self) -> domain::FilesystemKind {
-        match self.filesystem {
-            0 => domain::FilesystemKind::Fat32,
-            1 => domain::FilesystemKind::Ntfs,
-            2 => domain::FilesystemKind::ExFat,
-            _ => domain::FilesystemKind::Ext4,
         }
     }
 

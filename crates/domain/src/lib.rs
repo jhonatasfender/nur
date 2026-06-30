@@ -10,6 +10,6 @@ mod volume_label;
 pub use byte_size::ByteSize;
 pub use device::Device;
 pub use device_path::DevicePath;
-pub use format_options::{FilesystemKind, PartitionScheme};
+pub use format_options::PartitionScheme;
 pub use iso_kind::IsoKind;
 pub use volume_label::{InvalidLabel, VolumeLabel};
